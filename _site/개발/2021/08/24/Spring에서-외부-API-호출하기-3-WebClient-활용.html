@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Spring에서 외부 API 호출하기 3 (WebClient 활용) | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Spring에서 외부 API 호출하기 3 (WebClient 활용)">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="활용">
+<meta property="og:description" content="활용">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-08-24T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Spring에서 외부 API 호출하기 3 (WebClient 활용)">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2021-08-24T00:00:00+09:00","datePublished":"2021-08-24T00:00:00+09:00","description":"활용","headline":"Spring에서 외부 API 호출하기 3 (WebClient 활용)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Spring에서 외부 API 호출하기 3 (WebClient 활용)</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-08-24T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Aug 24, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 7 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#%EC%99%B8%EB%B6%80%20API%20%ED%98%B8%EC%B6%9C">#외부 API 호출</a><a class="post-tag" href="/tags.html#Webclient">#Webclient</a><a class="post-tag" href="/tags.html#WebFlux">#WebFlux</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="활용">활용</h2>
+
+<p>그.래.서</p>
+
+<p>대-충 webClient를 사용하는 방법은 알았고, 그 후엔 어떻게 하면 효율적으로 사용할 수 있는지 계속 고민을 하였었다.</p>
+
+<p><em><u>~~(효율적이라 쓰고 귀찮아서 어떻게 하면 한번에 처리할 수 있을까 머리 굴린거라고 읽는.. )~~</u></em></p>
+
+<p>대략적인 상황은 이랬었다.</p>
+
+<ul>
+  <li>약 20개의 각기 다른 api를 호출.</li>
+  <li>각 Response는 당연히 다르다. (같은 것도 있긴 했다.)</li>
+  <li>외부 api에서 서버에러가 발생하는 경우(http status가 40x, 50x로 오는 경우)  response가 정해진 형식으로 도착한다.</li>
+  <li>그 외 예상하지 못한 오류가 발생하면 그냥 에러로 넘어온다.</li>
+  <li>어떤 api는 상태를 기다렸다가 다시 재 조회를 하여 로직을 처리해야한다.</li>
+</ul>
+
+<p>처음에는 무작정 20개의 api들을 다 따로 처리하였었다.</p>
+
+<p>(원래 프로젝트에서 api 호출 service와 객체를 처리하는 service를 나누기는 했었다.)</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Service</span><span class="o">{</span>
+    
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">WebClient</span> <span class="n">webClient</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">api1</span><span class="o">(){</span>
+         <span class="nc">SampleDto</span> <span class="n">sampleDto</span> <span class="o">=</span> <span class="n">webClient</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+        <span class="o">...</span>
+        <span class="o">.</span><span class="na">block</span><span class="o">();</span>
+        
+        <span class="k">return</span> <span class="n">sampleDto</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">api2</span><span class="o">(){</span>
+         <span class="nc">SampleDto</span> <span class="n">sampleDto</span> <span class="o">=</span> <span class="n">webClient</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+        <span class="o">...</span>
+        <span class="o">.</span><span class="na">block</span><span class="o">();</span>
+        
+        <span class="k">return</span> <span class="n">sampleDto</span><span class="o">;</span>
+    <span class="o">}</span>
+   
+    <span class="o">.</span>
+    <span class="o">.</span>
+    <span class="o">.</span>
+    
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이렇게 되니 반복되는 부분이 눈에 보였고, 뭔가 비효율 적이라는 생각이 들었다. <del><em><u>초보개발자의 한계란.. 꼭 해봐야 비효율적인게 눈에 보인다...ㅠㅠ..</u></em></del></p>
+
+<p>그래서 우선, 공통된 부분을 묶어 관리 할 수 있도록  Service에서 api를 호출하고, exchange까지 완료한 후, 공통클래스에 넘겨버렸다….</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Service</span><span class="o">{</span>
+    
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">WebClient</span> <span class="n">webClient</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">ObjectMapper</span> <span class="n">mapper</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="nc">CommonDto</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="nf">getSampleCommonDto</span><span class="o">()</span> <span class="o">{</span>
+
+    <span class="nc">Mono</span><span class="o">&lt;</span><span class="nc">ClientResponse</span><span class="o">&gt;</span> <span class="n">exchange</span> <span class="o">=</span> <span class="n">webClient</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+         <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="n">uriBuilder</span> <span class="o">-&gt;</span> <span class="n">uriBuilder</span>
+            <span class="o">.</span><span class="na">path</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"/sample/sample2/sample3"</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">queryParam</span><span class="o">(</span><span class="s">"x"</span><span class="o">,</span> <span class="mi">2</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">queryParam</span><span class="o">(</span><span class="s">"y"</span><span class="o">,</span> <span class="mi">3</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">build</span><span class="o">())</span>
+        <span class="o">.</span><span class="na">exchange</span><span class="o">();</span>
+        
+    <span class="k">return</span> <span class="k">new</span> <span class="nc">CommonDto</span><span class="o">&lt;&gt;(</span><span class="n">exchange</span><span class="o">,</span> <span class="nc">SampleDto</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">mapper</span><span class="o">);</span>
+
+  <span class="o">}</span>
+   
+    <span class="o">.</span>
+    <span class="o">.</span>
+    <span class="o">.</span>
+    
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>CommDto가 응답을 공통적으로 처리하는 클래스이다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">CommonDto</code> 생성자의 첫번째 인자로는 api 호출 부분을, 두번째 인자로는 Response를 받는 Dto class를, 세번째 인자로는 mapper 클래스를 넣어주었다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CommonDto</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="nc">Object</span> <span class="n">response</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">tClass</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="nc">ObjectMapper</span> <span class="n">mapper</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nf">CommonDto</span><span class="o">(</span><span class="nc">Mono</span><span class="o">&lt;</span><span class="nc">ClientResponse</span><span class="o">&gt;</span> <span class="n">data</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">classType</span><span class="o">,</span> <span class="nc">ObjectMapper</span> <span class="n">mapper</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">tClass</span> <span class="o">=</span> <span class="n">classType</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">mapper</span> <span class="o">=</span> <span class="n">mapper</span><span class="o">;</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">response</span> <span class="o">=</span> <span class="n">data</span>
+      <span class="o">.</span><span class="na">flatMap</span><span class="o">(</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">t</span><span class="o">.</span><span class="na">statusCode</span><span class="o">().</span><span class="na">value</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">BAD_REQUEST_400</span> 
+          <span class="o">||</span> <span class="n">t</span><span class="o">.</span><span class="na">statusCode</span><span class="o">().</span><span class="na">value</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR_500</span><span class="o">)</span> <span class="o">{</span> <span class="c1">//1</span>
+
+          <span class="k">if</span> <span class="o">(</span><span class="n">isErrorResponse</span><span class="o">())</span> <span class="o">{</span> <span class="c1">//2. .. 관련 코드는 따로 없습니다. 로직상 필요해서 넣은 부분 </span>
+            <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="nc">ErrorResponseDto</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+          <span class="o">}</span>
+          <span class="k">return</span> <span class="nc">Mono</span><span class="o">.</span><span class="na">error</span><span class="o">(</span><span class="k">new</span> <span class="nc">DataCallFailException</span><span class="o">());</span> <span class="c1">//3</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">class</span><span class="o">);</span><span class="c1">//4</span>
+      <span class="o">})</span>
+      <span class="o">.</span><span class="na">block</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="no">T</span> <span class="nf">convertStringToObject</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">mapper</span><span class="o">.</span><span class="na">readValue</span><span class="o">((</span><span class="nc">String</span><span class="o">)</span><span class="n">response</span><span class="o">,</span> <span class="n">tClass</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isErrorType</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">response</span> <span class="k">instanceof</span> <span class="nc">ErrorResponse</span><span class="o">.</span><span class="na">ErrorResponseContainer</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>CommonDto를 생성해 보았다.</p>
+
+<p>일단 Clascc와 mapper을 초기화 해주고, 응답은 원하는 로직에 맞게 짜주었다.</p>
+
+<p>내가 진행했던 프로젝트에서는 외부 api에서 응답코드를 주고, 특정 에러인 경우 정해진 형식으로 넘어왔다.</p>
+
+<p>그래서 특정 api에 특정 에러가 발생한다면  <code class="language-plaintext highlighter-rouge">ErrorResponseDto</code> 형식으로 바꿔 response를 초기화 해주고, 그렇지 않다면 Exception을 발생시켰다.</p>
+
+<p>응답이 성공적으로 온다면, 우선 <code class="language-plaintext highlighter-rouge">String </code> 으로 변환시켰다. 그 이유는 프로젝트에서 그렇게 필요했기 때문에..</p>
+
+<p>그래서 Class와 ObjectMapper를 받아 <code class="language-plaintext highlighter-rouge">convertStringToObject</code> 메소드를 통해 원하는 객체 형식으로 변환하여 사용하였다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RealUseService</span><span class="o">{</span>
+    
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Service</span> <span class="n">service</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">getSampleDto</span><span class="o">()</span> <span class="o">{</span>
+
+      <span class="nc">CommonDto</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">commonDto</span> <span class="o">=</span>  <span class="n">service</span><span class="o">.</span><span class="na">getSampleCommonDto</span><span class="o">();</span>
+        <span class="nc">SampleDto</span> <span class="n">sampleDto</span> <span class="o">=</span> <span class="n">commonDto</span><span class="o">.</span><span class="na">convertStringToObject</span><span class="o">();</span>
+        
+    <span class="k">return</span> <span class="n">sampleDto</span><span class="o">;</span>
+
+  <span class="o">}</span>
+   
+    <span class="o">.</span>
+    <span class="o">.</span>
+    <span class="o">.</span>
+    
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이런식으로 api를 호출하는 서비스와 사용하는 서비스를 나눠 사용하였다. 그냥 단순한 호출이 아닌 필요한 로직도 넣고..</p>
+
+<p>단순 호출 api의 경우에는 이렇게 처리 했다.</p>
+
+<hr>
+
+<p>대부분이 단순 호출인 경우였지만, api호출 시 상태가 업데이트 되면 그에 따라 필요한 결과를 호출해야하는 경우도 있었다.</p>
+
+<p>다행히 api에서 예상 대기시간을 주었다.</p>
+
+<p>예상 대기시간을 이용하여 그 시간동안 기다린 후 상태를 체크하고, 상태가 <code class="language-plaintext highlighter-rouge">완료</code>라면 로직 수행, 아니라면 다시 기다리는 로직을 짰다.</p>
+
+<p>어떻게 코드를 짤까 고민하다가, webFlux라면 뭔가 관련된 코드가 있을것이라 생각되어 찾아보았고, 비슷한 코드가 있다는 것을 발견했다.</p>
+
+<p><em><del>WebFlux에 관한 지식이 부족하여 관련 문건을 얼마나 찾아봤는지 모른다..ㅠㅠ…</del></em></p>
+
+<p>거듭된 실패 끝에.. <a href="https://stackoverflow.com/questions/54591964/how-to-delay-repeated-webclient-get-request">StackOverFlow</a>에서 나와 비슷한 고민을 해결한 사례가 있어 참고하여 코드를 수정하였다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">getStatus</span><span class="o">(</span><span class="kt">long</span> <span class="n">estimateTime</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="nc">Flux</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">sampleFlux</span> <span class="o">=</span>  <span class="n">webClient</span><span class="o">.</span><span class="na">get</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">uri</span><span class="o">(</span><span class="s">"/sample"</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">retrieve</span><span class="o">()</span>
+        <span class="o">.</span><span class="na">bodyToMono</span><span class="o">(</span><span class="nc">SampleDto</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+        <span class="o">.</span><span class="na">doOnError</span><span class="o">(</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">{</span>
+          <span class="k">throw</span> <span class="k">new</span> <span class="nf">DataCallFailException</span><span class="o">();</span>
+        <span class="o">})</span>
+        <span class="o">.</span><span class="na">repeatWhen</span><span class="o">(</span><span class="n">longFlux</span> <span class="o">-&gt;</span> <span class="nc">Flux</span><span class="o">.</span><span class="na">interval</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofSeconds</span><span class="o">(</span><span class="n">estimateTime</span><span class="o">)))</span>
+        <span class="o">.</span><span class="na">skipUntil</span><span class="o">(</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span><span class="o">.</span><span class="na">getStatus</span><span class="o">.</span><span class="na">equal</span><span class="o">(</span><span class="s">"실패"</span><span class="o">)</span>
+            <span class="o">||</span> <span class="n">t</span><span class="o">.</span><span class="na">getStatus</span><span class="o">.</span><span class="na">equal</span><span class="o">(</span><span class="s">"에러"</span><span class="o">)</span>
+            <span class="o">||</span> <span class="n">t</span><span class="o">.</span><span class="na">getStatus</span><span class="o">.</span><span class="na">equal</span><span class="o">(</span><span class="s">"완료"</span><span class="o">))</span>
+        <span class="o">;</span>
+      
+      
+     <span class="k">return</span> <span class="n">sampleFlux</span><span class="o">.</span><span class="na">blockFirst</span><span class="o">();</span>
+  <span class="o">}</span>
+</code></pre></div></div>
+
+<p>위에서 응답을 바로 받는 코드들은 Mono를 사용하였는데, 이 로직은 Flux를 사용하였다. 일정 시간동안 여러 응답이 들어오기 때문!</p>
+
+<p><code class="language-plaintext highlighter-rouge">retirieve</code>를 통해 <code class="language-plaintext highlighter-rouge">bodyToMono</code>로 결과 값을 받는건 앞과 동일하다.</p>
+
+<p>그 이후 <code class="language-plaintext highlighter-rouge">repeatWhen</code>을 통해 일정 시간동안 요청을 반복한다. 언제까지? <code class="language-plaintext highlighter-rouge">skipUntil</code>의 조건을 충족할 때 까지.</p>
+
+<p><code class="language-plaintext highlighter-rouge">skipUntil</code>은 안에 조건들이 충족될 때까지 모든 요청을 skip한다. 나같은 경우 실패, 에러, 완료의 조건이 충족되기 전 까지는 응답을 받지 않았다.</p>
+
+<p>조건이 충족됐다면 <code class="language-plaintext highlighter-rouge">blockFirst</code>를 통해 response를 SampleDto 형식으로 받는 그런 구조였다.</p>
+
+<p>skipUntil 말고 <code class="language-plaintext highlighter-rouge">take</code>조건도 있으니 참고자료를 통해 확인하면 좋을 것 같다.</p>
+
+<h2 id="참고">참고</h2>
+
+<p><a href="https://javacan.tistory.com/entry/Reactor-Start-4-tbasic-ransformation">시퀀스 변환 참고</a></p>
+
+<h2 id="webclient-활용-후기">WebClient 활용 후기</h2>
+
+<p>처음 webClient를 사용하려 했을때는 뭐 그냥 쓰면 되겠지..^^ 하고 겁도 없이 덤빈것 같다 ^^^</p>
+
+<p>사용하고 나니 너무 만만히 본 것 같은 느낌..^^^ 특히 WebFlux에 대해 공부하면 공부할수록 더 모르는 사실이 많이 발견되었다.</p>
+
+<p>사실 뭐.. block를 써도 되는것인지 subscribe로 하면 될거같은데 난 왜 하면 안되는 것인지..</p>
+
+<p>내 로직은 왜 이렇게 구린것인지….</p>
+
+<p>공부를 더 많이 했다면 지금보다 훨씬 더 좋은 코드를 짤 수 있었을 텐데.. 그 부분이 조금 아쉽다.</p>
+
+<p>앞으로 공부를 더 해나가서 나중에 프로젝트에 코드 리팩토링을 전체적으로 싹 하는게 목표다… 언제가 될지는 모르겠지만..</p>
+
+<p>WebFlux가 점점 대세가 된다고 하니 바짝 공부하는 것도 좋을 것 같다!!!</p>
+
+<p>공부해야지!!!!!</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%9C%EB%B0%9C/2021/08/11/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-2-Webclient.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">Spring에서 외부 API 호출하기 2 (Webclient)...</a><a class="next" href="/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html" title="DOCKER에서 ELK 설치 및 사용하기">DOCKER에서 ELK 설치 및 사용하기</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html" title="DOCKER에서 ELK 설치 및 사용하기">ELK Security 설정</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/14/HTTP-%ED%97%A4%EB%8D%94-2-%EC%BA%90%EC%8B%9C%EC%99%80-%EC%A1%B0%EA%B1%B4%EB%B6%80-%EC%9A%94%EC%B2%AD.html" title="DOCKER에서 ELK 설치 및 사용하기">HTTP 헤더 2 - 캐시와 조건부 요청</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html" title="DOCKER에서 ELK 설치 및 사용하기">DOCKER에서 ELK 설치 및 사용하기</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html" title="DOCKER에서 ELK 설치 및 사용하기">HTTP 상태코드 요약</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -59,9 +59,7 @@ public class SampleJdbcTemplateRepository {
 
 ### 어떻게 활용했나
 
-참고 : https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Batch-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/
-
-위의 블로그를 참고하여 코드를 작성하였다. 
+이 [블로그](https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Batch-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/)를 참고하여 코드를 작성하였다. 
 
 서론에서 언급했지만 테이블이 약 20개에, 모두 연관관계로 매핑되어있었고, 데이터의 양도 많았기 때문에.. 
 
@@ -175,9 +173,7 @@ INSERT INTO test_table (~~~) VALUES (~~~)
 
 
 
-그래서 spring에서 batch-insert를 지원한다고 하여 사용해 봤었지만.. 내가 원하는 기능은 아니었다. 
-
-(참고 : https://jaehun2841.github.io/2020/11/22/2020-11-22-spring-data-jpa-batch-insert/#hibernateorder_inserts-hibernateorder_updates)
+그래서 spring에서 batch-insert를 지원한다고 하여 사용해 봤었지만.. 내가 원하는 기능은 아니었다. [참고](https://jaehun2841.github.io/2020/11/22/2020-11-22-spring-data-jpa-batch-insert/#hibernateorder_inserts-hibernateorder_updates)
 
 내가 지정한 id의 생성 방식도 <u>strategy = GenerationType.IDENTITY</u> 이렇게 지정했었을 뿐더러
 
@@ -196,9 +192,7 @@ batch-size를 지정하여 저장하였을 때는 약 <u>1시간</u> 정도의 �
 
 **그럼 JdbcTamplate를 이용했을때는?**
 
-https://wave1994.tistory.com/160
-
-이 블로그를 참고해보면 Hibernate에서는 insert가 단 건으로 처리되지만, DB driver에서 해당 쿼리들을 모아 batch insert를 시켜준다고 한다.
+이 [블로그](https://wave1994.tistory.com/160)를 참고해보면 Hibernate에서는 insert가 단 건으로 처리되지만, DB driver에서 해당 쿼리들을 모아 batch insert를 시켜준다고 한다.
 
 JdbcTamplate을 사용했을 때는 <u>20분~30분</u>의 시간이 소요되었다. ~~정말 눈에 띄게 시간이 단축되어 성공했을때 울뻔했다..~~
 

@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Spring-Elasticsearch 연동 2 - Query Builder | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Spring-Elasticsearch 연동 2 - Query Builder">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="유용한 참고자료">
+<meta property="og:description" content="유용한 참고자료">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-12-09T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Spring-Elasticsearch 연동 2 - Query Builder">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2021-12-09T00:00:00+09:00","datePublished":"2021-12-09T00:00:00+09:00","description":"유용한 참고자료","headline":"Spring-Elasticsearch 연동 2 - Query Builder","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Spring-Elasticsearch 연동 2 - Query Builder</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-12-09T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Dec 09, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 8 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a><a class="post-tag" href="/tags.html#Spring">#Spring</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="유용한-참고자료">유용한 참고자료</h2>
+
+<ul>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high.html"><strong>Java High Level Rest Client 사용 정리 guide</strong></a></li>
+</ul>
+
+<h2 id="1-기본-사용법">1. 기본 사용법</h2>
+
+<p>Spring Elasticsearch 연동 1과 같이 설정을 완료하였다면, 바로 호출해서 사용가능하다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchService</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">RestHighLevelClient</span> <span class="n">client</span><span class="o">;</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">INDEX</span> <span class="o">=</span> <span class="s">"my_index"</span><span class="o">;</span>
+	
+    <span class="kd">public</span> <span class="nc">SearchResponse</span> <span class="nf">sampleQuery</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		
+        <span class="nc">SearchSourceBuilder</span> <span class="n">searchSourceBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchSourceBuilder</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">query</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">matchAllQuery</span><span class="o">())</span>
+        <span class="c1">//  .aggregation() // 필요할 경우 사용</span>
+            <span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> 
+      
+		<span class="nc">SearchRequest</span> <span class="n">searchRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchRequest</span><span class="o">(</span><span class="no">INDEX</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">source</span><span class="o">(</span><span class="n">searchSourceBuilder</span><span class="o">);</span>
+		
+        <span class="nc">SearchResponse</span> <span class="n">searchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">search</span><span class="o">(</span><span class="n">searchRequest</span><span class="o">,</span> <span class="nc">RequestOptions</span><span class="o">.</span><span class="na">DEFAULT</span><span class="o">);</span>
+        
+		<span class="k">return</span> <span class="n">searchResponse</span><span class="o">;</span>
+	<span class="o">}</span>
+    
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>위의 코드는 하단의 쿼리를 수행한 것과 같다.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET</span><span class="w"> </span><span class="err">/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">	</span><span class="nl">"size"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"match_all"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>이런식으로 query, aggregtion, size를 만들어 원하는 쿼리를 작성 한 후, <code class="language-plaintext highlighter-rouge">SearchRequest</code>를 생성한다.</p>
+
+<p>그 후, <code class="language-plaintext highlighter-rouge">client.search()</code>를 통해 쿼리를 보내고, 그 응답을 <code class="language-plaintext highlighter-rouge">SearchResponse</code>로 받게된다.</p>
+
+<h2 id="2-query-만들기">2. Query 만들기</h2>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">my_index</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+				</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+						</span><span class="s2">"ABC"</span><span class="p">,</span><span class="w">
+						</span><span class="s2">"BCD"</span><span class="w">
+					</span><span class="p">]</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"exists"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a_field"</span><span class="w">
+				
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"exists"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"b_field"</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"c_field"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+						</span><span class="s2">"AAAA"</span><span class="w">
+					</span><span class="p">]</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">}]</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+	</span><span class="p">},</span><span class="w">
+	</span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"agg_a_field"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a_field"</span><span class="p">,</span><span class="w">
+				</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w">
+				</span><span class="nl">"order"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+					</span><span class="nl">"name_count.value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"desc"</span><span class="w">
+				</span><span class="p">}]</span><span class="w">
+			</span><span class="p">},</span><span class="w">
+			</span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"name_count"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"cardinality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name"</span><span class="w">
+					</span><span class="p">}</span><span class="w">
+				</span><span class="p">},</span><span class="w">
+				</span><span class="nl">"paging"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"bucket_sort"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"sort"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+						</span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+						</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="w">
+					</span><span class="p">}</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">}</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+	</span><span class="p">},</span><span class="w">
+	</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>위의 elasticsearch 쿼리를 SearchSourceBuilder로 변환하면, 아래의 코드와 같아진다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchService</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">RestHighLevelClient</span> <span class="n">client</span><span class="o">;</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">INDEX</span> <span class="o">=</span> <span class="s">"my_index"</span><span class="o">;</span>
+	
+    <span class="c1">//전체 쿼리 처리 </span>
+    <span class="kd">public</span> <span class="nc">SearchResponse</span> <span class="nf">sampleQuery</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">names</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">cFields</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		
+        <span class="nc">SearchSourceBuilder</span> <span class="n">searchSourceBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchSourceBuilder</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">query</span><span class="o">(</span><span class="n">myQuery</span><span class="o">(</span><span class="n">names</span><span class="o">,</span> <span class="n">cFields</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">aggregation</span><span class="o">(</span><span class="n">myAggregation</span><span class="o">())</span> 
+            <span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> 
+      
+		<span class="nc">SearchRequest</span> <span class="n">searchRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchRequest</span><span class="o">(</span><span class="no">INDEX</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">source</span><span class="o">(</span><span class="n">searchSourceBuilder</span><span class="o">);</span>
+		
+        <span class="nc">SearchResponse</span> <span class="n">searchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">search</span><span class="o">(</span><span class="n">searchRequest</span><span class="o">,</span> <span class="nc">RequestOptions</span><span class="o">.</span><span class="na">DEFAULT</span><span class="o">);</span>
+        
+		<span class="k">return</span> <span class="n">searchResponse</span><span class="o">;</span>
+	<span class="o">}</span>
+    
+    <span class="c1">//query 부분</span>
+    <span class="kd">private</span> <span class="nc">QueryBuilder</span> <span class="nf">myQuery</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">names</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">cFields</span><span class="o">){</span>
+			<span class="k">return</span> <span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">boolQuery</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">termsQuery</span><span class="o">(</span><span class="s">"name"</span><span class="o">,</span> <span class="n">names</span><span class="o">))</span>  <span class="c1">//names = ["ABC","BCD"]</span>
+				<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">existsQuery</span><span class="o">(</span><span class="s">"a_field"</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">existsQuery</span><span class="o">(</span><span class="s">"b_field"</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">termsQuery</span><span class="o">(</span><span class="s">"c_field"</span><span class="o">,</span> <span class="n">cFields</span><span class="o">))</span> <span class="c1">//cFields = ["AAAA"]</span>
+				<span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//aggregation 부분</span>
+    <span class="kd">private</span> <span class="nc">TermsAggregationBuilder</span> <span class="nf">myAggregation</span><span class="o">(){</span>
+
+			<span class="nc">CardinalityAggregationBuilder</span> <span class="n">nameCardinalityAggs</span> <span class="o">=</span> <span class="nc">AggregationBuilders</span>
+				<span class="o">.</span><span class="na">cardinality</span><span class="o">(</span><span class="s">"name_count"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+        
+			<span class="nc">BucketSortPipelineAggregationBuilder</span> <span class="n">paging</span> <span class="o">=</span> <span class="nc">PipelineAggregatorBuilders</span>
+				<span class="o">.</span><span class="na">bucketSort</span><span class="o">(</span><span class="s">"paging"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;())</span>
+				<span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">20</span><span class="o">);</span>
+        
+			<span class="k">this</span><span class="o">.</span><span class="na">aggregationBuilder</span> <span class="o">=</span> <span class="nc">AggregationBuilders</span>
+				<span class="o">.</span><span class="na">terms</span><span class="o">(</span><span class="s">"agg_a_field"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"a_field"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">order</span><span class="o">(</span><span class="nc">BucketOrder</span><span class="o">.</span><span class="na">aggregation</span><span class="o">(</span><span class="s">"name_count.value"</span><span class="o">,</span> <span class="kc">false</span><span class="o">))</span> <span class="c1">//name_count의 value의 내림차순으로 정렬</span>
+				<span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">10000</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">subAggregation</span><span class="o">(</span><span class="n">nameCardinalityAggs</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">subAggregation</span><span class="o">(</span><span class="n">paging</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="3-응답-처리">3. 응답 처리</h2>
+
+<p>위의 쿼리를 실행시키면 아래와 같은 응답이 출력된다. (필요 부분만 표기)</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"took"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">197</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timed_out"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"_shards"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span><span class="w">
+  </span><span class="nl">"hits"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span><span class="w">
+  </span><span class="nl">"aggregations"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"agg_a_field"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"buckets"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+        </span><span class="err">//후략</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>간단히 출력을 설명하자면, query를 수행한 후, a_field를 가지고 있는 name의 수가 많은 순으로 출력한 것이다.</p>
+
+  <p>select a_field, count(distinct name) from my_index where {query 조건} group by a_field order by count(distinct name) desc;</p>
+
+  <p>a_filed의 데이터 타입이 number이기 때문에 nubmer형식으로 표기되었다.</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">SearchResponse</code>로 받게 되면, 객체로 넘어오게 되는데 필요한 부분을 사용하기 위해 파싱이 필요하였다.</p>
+
+<p>내가 원하는 정보는 buckets 배열에 있는 key(a_field의 값)과 name_count의 value 부분이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Getter</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticResponse</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Long</span><span class="o">,</span> <span class="nc">Long</span><span class="o">&gt;</span> <span class="n">data</span><span class="o">;</span> <span class="c1">// a_filed, name_count 값을 map으로 저장 </span>
+
+	<span class="kd">public</span> <span class="nf">ElasticResponse</span><span class="o">(</span><span class="nc">SearchResponse</span> <span class="n">searchResponse</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+
+		<span class="nc">Terms</span> <span class="n">terms</span> <span class="o">=</span> <span class="n">searchResponse</span><span class="o">.</span><span class="na">getAggregations</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"agg_a_field"</span><span class="o">);</span>
+
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Terms</span><span class="o">.</span><span class="na">Bucket</span> <span class="n">bucket</span> <span class="o">:</span> <span class="n">terms</span><span class="o">.</span><span class="na">getBuckets</span><span class="o">())</span> <span class="o">{</span>
+			<span class="nc">Long</span> <span class="n">a_field</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Long</span><span class="o">)</span><span class="n">bucket</span><span class="o">.</span><span class="na">getKey</span><span class="o">();</span>
+			<span class="nc">Cardinality</span> <span class="n">nameCount</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getAggregations</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"name_count"</span><span class="o">);</span>
+
+			<span class="k">this</span><span class="o">.</span><span class="na">data</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">a_field</span><span class="o">,</span> <span class="n">nameCount</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>사실 파싱하는 로직을 짜면서 이게 왜 이렇게 해야하나 시행착오가 많았는데, 지금 보니 조금 알 것같기도 하다…</p>
+
+<ol>
+  <li>실행 쿼리의 aggregation 부분에 <code class="language-plaintext highlighter-rouge">agg_a_field</code> 가 terms Query로 구성되어 있어, searchResponse의 <code class="language-plaintext highlighter-rouge">aggregations </code>필드에서도 <code class="language-plaintext highlighter-rouge">Terms</code>객체로 <code class="language-plaintext highlighter-rouge">agg_a_field</code>를 받는다.</li>
+  <li>각 terms 안에 name_count를 찾는 부분도 Cardinality로 되어있으니 name_count도 마찬가지로 <code class="language-plaintext highlighter-rouge">Cardinality</code>로 객체를 받는다.</li>
+  <li>받아서 원하는 데이터를 찾아 가공한다.</li>
+</ol>
+
+<p>내가 이해한게 맞는건지는 잘 모르겠지만.. 틀린다면 추후 글을 수정해야겠다 :(</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html" title="Spring-Elasticsearch 연동 1- Spring 설정">Spring-Elasticsearch 연동 1- Spring 설정</a><a class="next" href="/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html" title="특정 API만 Swagger에 노출">특정 API만 Swagger에 노출</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html" title="특정 API만 Swagger에 노출">Spring에서 외부 API 호출하기 3 (WebClient 활용)</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html" title="특정 API만 Swagger에 노출">HTTP 상태코드 요약</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html" title="특정 API만 Swagger에 노출">ELK - POSTGRES to LOGSTASH</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html" title="특정 API만 Swagger에 노출">Spring Batch Insert 어떻게 해결했을까</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

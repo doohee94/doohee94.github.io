@@ -1,0 +1,2254 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-02-28T22:22:08+09:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">URMOO BLOG</title><subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle><author><name>doohee94</name></author><entry><title type="html">ELK - POSTGRES to LOGSTASH</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html" rel="alternate" type="text/html" title="ELK - POSTGRES to LOGSTASH" /><published>2022-02-17T00:00:00+09:00</published><updated>2022-02-17T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html"><![CDATA[<p>postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 <a href="http://doohee94.github.io/개발/2021/09/27/DOCKER에서-ELK-설치-및-사용하기.html">여기</a>에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.</p>
+
+<p>우선, 아래와 같은 conf 파일을 logstash에서 기본적으로 사용한다고 가정한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># cd logstash/pipeline
+# vi {이름}.conf
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input {
+  jdbc {
+     jdbc_connection_string =&gt; "jdbc:postgresql://{IP}:{PORT}/{DATABASE}"
+     jdbc_user =&gt; "{USER}"
+     jdbc_password =&gt; "{PASSWORD}"
+     jdbc_driver_class =&gt; "org.postgresql.Driver"
+     jdbc_driver_library =&gt; "/usr/share/logstash/logstash-core/lib/jars/postgresql.jar"
+
+     statement =&gt; "select * from test.test test where id &gt;= ? and id&lt; ? + ?  order by id asc"
+
+     use_column_value =&gt; true
+     tracking_column =&gt; "id"
+     tracking_column_type =&gt; "numeric"
+
+     use_prepared_statements =&gt; true
+     prepared_statement_bind_values =&gt; [":sql_last_value", ":sql_last_value", 10000]
+     prepared_statement_name =&gt; "id"
+
+     last_run_metadata_path =&gt; "/usr/share/logstash/last_run_metadata/last_value_1.yml"
+
+     jdbc_pool_timeout =&gt; 300
+     schedule =&gt; "0 * * * *"
+
+ }
+}
+
+output {
+  elasticsearch {
+    hosts =&gt; ["http://elasticsearch:9200"]
+    index =&gt; "my_index"
+    document_id =&gt; "%{id}"
+    doc_as_upsert =&gt; true
+    template =&gt; "/usr/share/logstash/template/my_basic_template.json"
+    user =&gt; "elastic"
+    password =&gt; "changegame!"
+
+ }
+}
+</code></pre></div></div>
+
+<h2 id="1-pipeline">1. pipeline</h2>
+
+<p><del>보통 logstsh의 pipeline을 사용하는 경우, <code class="language-plaintext highlighter-rouge">pipeline.yml</code>파일을 생성해서 관리를 해준다고 하는데, docker-elk의 경우는 pipeline 폴더에 원하는 설정파일들을 생성해 준 후,  <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>내 파일의 경로만 잘 설정해 준다면 문제 없이 작동하는 것 같다.</del></p>
+
+<blockquote>
+  <p><del>하지만 이럴경우 훗날 설정파일이 많아졌을 때 관리하기가 힘들어 지는 일이 생기니.. yml파일을 만들어서 사용하는것이 좋을 것 같다 😅</del></p>
+</blockquote>
+
+<p><em>22년 2월 17일 수정</em></p>
+
+<p>pipelines.yml이 필요한게 맞았다!!</p>
+
+<p>하나의 서버에서 각기 다른 설정으로 conf 파일을 2개 만들었었는데, 자꾸 두 인덱스가 겹치는 문제가 발생해서 확인해 보니, pipelines.yml 파일 설정을 해주지 않아 데이터가 두 인덱스로 다 들어가버렸다.. 이걸로 몇날며칠 고생했다 ㅂㄷㅂㄷ..</p>
+
+<p><strong>pipelines.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">pipeline.id</span><span class="pi">:</span> <span class="s">dev</span>
+  <span class="na">path.config</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/usr/share/logstash/pipeline/dev.conf"</span>
+<span class="pi">-</span> <span class="na">pipeline.id</span><span class="pi">:</span> <span class="s">prod</span>
+  <span class="na">path.config</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/usr/share/logstash/pipeline/prod.conf"</span>
+
+</code></pre></div></div>
+
+<p>이렇게 pipeliens.yml 설정해 주고, docker-compose.yml 파일에서 pipelines.yml 파일의 경로도 잡아주면 된다! <a href="https://psawesome.tistory.com/70">참고</a></p>
+
+<h2 id="2-sql_last_value-파일">2. sql_last_value 파일</h2>
+
+<p>설정파일이 많아질 경우, last_value의 값도 많아지는 경우가 생긴다.</p>
+
+<p>이럴 경우 파일을 각각 생성해서 관리하는 것이 좋을 것 같다.</p>
+
+<p>나같은 경우 logstash 디렉토리에 <code class="language-plaintext highlighter-rouge">last_run_metadata</code> 디렉토리를 생성하여 그 안에서 파일을 따로 관리하였다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>last_run_metadata_path =&gt; "/usr/share/logstash/last_run_metadata/last_value_1.yml"
+</code></pre></div></div>
+
+<p>설정 파일 내부에 해당 파일을 적용시켜 줄 수 있다.</p>
+
+<h2 id="3-index-template-파일">3. index template 파일</h2>
+
+<p>postgres에서 아무런 설정 없이 index를 생성할 경우 컬럼이 자동매핑되어 데이터가 저장된다.</p>
+
+<p>이럴경우 string data type 저장 시, 문제가 발생하게 된다.</p>
+
+<p>기본적으로 string은 text type과 keyword type으로 나뉘는데, 자동매핑인 경우 이 두 타입을 모두 저장하게 된다.</p>
+
+<p>그러면 데이터의 크기도 커질 뿐만아니라 쿼리를 실행시킬 시 시간도 오래걸리고, 정확한 값을 찾을 경우에는 <code class="language-plaintext highlighter-rouge">name.keyword</code> 이런식으로 키워드를 검색해주어야 한다.</p>
+
+<p>그래서 logstash를 이용해 저장할 경우 기본 템플릿을 정하여 데이터를 매핑 시킬 수 있다.</p>
+
+<p><strong>template 파일 예시</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"index_patterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"my_index*"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"ignore_above"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483647</span><span class="w">
+
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"ignore_above"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483647</span><span class="w">
+
+            </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<blockquote>
+  <ul>
+    <li>keyword 타입을 지정할 경우 <code class="language-plaintext highlighter-rouge">ignore_above</code>값을 지정해 주는 것이 좋다. 기본값은 256인데, 256자가 넘어가게 되면 짤려서 저장이 되기 때문이다. 최대 값은 2147483647이다.</li>
+    <li>index_patterns는 해당 템플릿을 적용할 인덱스의 title을 지정할 수 있다. 정규표현식을 사용한다.</li>
+  </ul>
+</blockquote>
+
+<p>해당 파일을 만들면, conf 파일에서 설정해준다.</p>
+
+<p>나같은 경우 logstash에 template 디렉토리만들어 그 안에 템플릿을 저장하였다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>template =&gt; "/usr/share/logstash/template/my_basic_template.json"
+</code></pre></div></div>
+
+<h2 id="4-docker-composeyml-파일-수정">4. docker-compose.yml 파일 수정</h2>
+
+<p>위에서 템플릿 파일이나 logstash 설정파일, last_value 파일 등등 여러개 파일을 생성하였다.</p>
+
+<p>생성한 파일의 경로를 docker 경로에 맞게 설정해주어야 한다.</p>
+
+<p>또한, docker 이미지 생성 시, 생성한 파일들도 생성할 수 있도록 명령어를 작성해 넣어주어야 한다.</p>
+
+<p><strong>docker-compose.yml 예시</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">logstash</span><span class="pi">:</span>
+   <span class="s">...</span>
+    <span class="s">command</span><span class="err">:</span> <span class="s">/bin/sh -c "touch /usr/share/logstash/last_run_metadata/last_value_1.yml</span>
+                        <span class="s">&amp;&amp; bin/logstash</span>
+                        <span class="s">&amp;&amp; touch /usr/share/logstash/template/my_basic_template.json</span>
+                        <span class="s">&amp;&amp; bin/logstash"</span>
+    <span class="s">volumes</span><span class="err">:</span>
+     <span class="s">...</span>
+      <span class="s">- ./logstash/last_run_metadata/:/usr/share/logstash/last_run_metadata/</span>
+      <span class="s">- ./logstash/template/:/usr/share/logstash/template/</span>
+<span class="nn">...</span>
+
+</code></pre></div></div>
+
+<ol>
+  <li>
+    <p>command 부분의 명령어를 통해 생성한 last_value 파일과 템플릿 파일을 docker 경로에 설정해준다.</p>
+  </li>
+  <li>
+    <p>새로 생성한 디렉토리가 있다면,  volumes 부분에 경로를 설정해준다.</p>
+
+    <p><code class="language-plaintext highlighter-rouge">ex) {내가 만든 경로}:{docker에 설정할 경로}</code></p>
+  </li>
+</ol>
+
+<h2 id="5permission-denied">5.Permission denied</h2>
+
+<p>last_value 파일이나 템플릿 파일을 생성해서 사용할 경우, Permission denied 문제가 발생한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chown 1000:1000 -R 해당 폴더
+</code></pre></div></div>
+
+<p>상단의 명령어를 통해 권한 문제를 해결할 수 있다. (참고 블로그 확인)</p>
+
+<h2 id="참고">참고</h2>
+
+<p><a href="https://github.com/deviantony/docker-elk">docker-elk git</a></p>
+
+<p><a href="https://epicarts.tistory.com/66">permission denied</a></p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="Docker" /><category term="elasticsearch" /><category term="logstash" /><category term="kibana" /><category term="postgres" /><summary type="html"><![CDATA[postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 여기에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.]]></summary></entry><entry><title type="html">Spring 에러 발생 시, Slack 알람 만들기</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html" rel="alternate" type="text/html" title="Spring 에러 발생 시, Slack 알람 만들기" /><published>2022-02-10T00:00:00+09:00</published><updated>2022-02-10T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html"><![CDATA[<p>지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.</p>
+
+<p>사용자 요청이 들어오면, 분석 서버로 분석을 요청하고, 그 후 작업은 비동기로 처리하고 있는데,  서버로 올렸을 경우 에러가 언제 발생했는지 모르고 그냥 지나치는 경우가 종종 있었다!  이것 말고도, 사용자가 사용했을 때, 예상하지 못했던 에러가 발생했어도 모르고 지나가는 일도 있었고..</p>
+
+<p>무튼, 여러모로 에러가 발생하면 알림오면 좋겠다고 생각을 했었다.</p>
+
+<p>2가지 방법으로 테스트를 했었고, 이에대한 기록을 남기고자한다!</p>
+
+<h2 id="1-logback-slack-appender">1.​ logback-slack-appender</h2>
+
+<p>Spring에 관련 기능이 있을까 하여 검색해보니 가장 대표적으로 사용하는 것이 logback-slack-appender 라이브러리 였다.</p>
+
+<p>logback에서 error 로그와 관련한 부분이 생기면 이벤트를 발생시켜 사용하는 방법인 것 같다.</p>
+
+<h3 id="적용-방법">적용 방법</h3>
+
+<p>기본적인 사용 방법은 링크의 이 <a href="https://velog.io/@haerong22/Spring-%EC%8A%AC%EB%9E%99%EC%97%90-%EB%A1%9C%EA%B7%B8-%EB%82%A8%EA%B8%B0%EA%B8%B0">블로그</a>를 참고하여 개발하였다.</p>
+
+<p>에러 알림을 만든다고 하였을 때, alpha 서버의 에러만 받도록 해달라는 팀장님의 요청이 있었고, 어찌어찌 alpha 서버 관련한 profile만 적용할 수 있도록 수정하였다.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--알림이 필요한 profile--&gt;</span>	
+<span class="nt">&lt;springProfile</span> <span class="na">name=</span><span class="s">"alpha"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">resource=</span><span class="s">"logback-alpha.yml"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;appender</span> <span class="na">name=</span><span class="s">"SLACK_ERROR"</span> <span class="na">class=</span><span class="s">"com.github.maricn.logback.SlackAppender"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;webhookUri&gt;</span>${webhook-uri}<span class="nt">&lt;/webhookUri&gt;</span>
+      <span class="nt">&lt;channel&gt;</span>#${channel}<span class="nt">&lt;/channel&gt;</span>
+        <span class="nt">&lt;layout</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.PatternLayout"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;pattern&gt;</span>*${LOG_PATTERN}*%n<span class="nt">&lt;/pattern&gt;</span>
+        <span class="nt">&lt;/layout&gt;</span>
+      <span class="nt">&lt;username&gt;</span>${username}<span class="nt">&lt;/username&gt;</span>
+      <span class="nt">&lt;iconEmoji&gt;</span>:${emoji}:<span class="nt">&lt;/iconEmoji&gt;</span>
+      <span class="nt">&lt;colorCoding&gt;</span>true<span class="nt">&lt;/colorCoding&gt;</span>
+    <span class="nt">&lt;/appender&gt;</span>
+    <span class="nt">&lt;appender</span> <span class="na">name=</span><span class="s">"ASYNC_SLACK_ERROR"</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.AsyncAppender"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;appender-ref</span> <span class="na">ref=</span><span class="s">"SLACK_ERROR"</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;filter</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.filter.ThresholdFilter"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;level&gt;</span>ERROR<span class="nt">&lt;/level&gt;</span>
+      <span class="nt">&lt;/filter&gt;</span>
+    <span class="nt">&lt;/appender&gt;</span>
+  <span class="nt">&lt;/springProfile&gt;</span>
+
+<span class="c">&lt;!--알림이 필요하지 않는 profile--&gt;</span>	
+  <span class="nt">&lt;springProfile</span> <span class="na">name=</span><span class="s">"beta"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">resource=</span><span class="s">"logback-beta.yml"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/springProfile&gt;</span>
+</code></pre></div></div>
+
+<h3 id="후기-및-장-단점">후기 및 장, 단점</h3>
+
+<p>회사에서 서버를 3개를 쓰고 있는데, 무사히 alpha서버만 에러를 띄우는데 성공했다!</p>
+
+<p>하지만 성공하고 에러를 보니, 장점보단 단점이 너무 명확하게 보였다..</p>
+
+<p>일단, 위에 logback-spring.xml 처럼 profile 별로 나눠 사용하는 것은 좋았으나,  ${username} 같은 관련 설정은 알람 기능을 사용하지 않는 beta 서버에도 작성을 해주어야 했었다. (logback-beta.yml 파일에.. 이건 내가 몰라서 그랬을지도… )</p>
+
+<p>또한, 알림이 오는 것 까진 좋았지만 exception에 관련한 거의 모든 데이터가 넘어와 어디서 에러가 발생했는지 확인하기 어려웠다.</p>
+
+<p>마지막으로 확인하고 싶지 않은 에러까지 다 넘어왔다. 예를들면 회원이 비밀번호가 틀렸다.. 이런 에러까지..</p>
+
+<p>장점은.. logback 기반이다보니, log.error() 코드로 작성한 에러도 잡힌다는 점..?</p>
+
+<p>아무튼, 이런 로그는 받아봤자 별로일 것 같아서 다시 관련된 사항을 검색해 보았고,</p>
+
+<p>우아한 형제 테크코스에서 손너잘님이 만드셨다는 슬랙알람 기능을 보게되었다!</p>
+
+<h2 id="2-slack-alaram">2. slack alaram</h2>
+
+<p>일단 사용 후기 작성 전, 손너잘님께 감사의 인사를 보냅니다..!</p>
+
+<p>자세한 개발 방법은 <a href="https://bperhaps.tistory.com/entry/Spring-Slack-Alarm-Logger-%EB%A7%8C%EB%93%A4%EA%B8%B0">손너잘님의 블로그</a>를 참고!</p>
+
+<p>사실 참고라고 할 것도 없이, 개발하신 코드를 복붙해서 사용했다 ^^..</p>
+
+<p>손너잘님의 코드는 한번에 사용할 수 있을 정도로 너무 좋았고 깔끔했고 짱이었고 최고였고 다했지만..</p>
+
+<p>원하는 부분이 조금(?) 달라 수정하여 사용하였다.</p>
+
+<p>수정 부분은 다음과 같다</p>
+
+<h4 id="개발자가-정의한-exception과-의도치-않은-exception-구분">개발자가 정의한 Exception과 의도치 않은 Exception 구분</h4>
+
+<p>우리 프로젝트에서 Exception 전략을 <a href="https://cheese10yun.github.io/spring-guide-exception/">cheese10yun 님의 블로그</a>를 참고하여 만들었다..</p>
+
+<p>BusinessException은 개발자가 정의한 Exception이고, 그렇지 않은 경우는 그냥 Exception이 발생하게 된다.</p>
+
+<p>팀원들은 어떻게 생각할지 모르겠지만.. 그냥 Exception이 발생한 경우가 좀 더 급한(?) 상황이라고 생각하였고, 이 경우에는 슬랙 메세지에 :rotating_light:를 달아 보내도록 수정해 보았다!</p>
+
+<p>사실 별건 없고, headerMessage를 정할 시,  <code class="language-plaintext highlighter-rouge">arg instanceof BusinessException </code> 를 통해 구분만 해주었다.</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SlackMessageGenerator</span> <span class="o">{</span>
+	
+   <span class="c1">//...</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">EXCEPTION_MESSAGE_FORMAT</span> <span class="o">=</span> <span class="s">"`[%s] %s.%s:%d`\n`%s`"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">EXCEPTION_HEADER_MESSAGE</span> <span class="o">=</span> <span class="s">":rotating_light: *[Exception 발생]* :rotating_light: \n"</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">generate</span><span class="o">(</span><span class="nc">ContentCachingRequestWrapper</span> <span class="n">request</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">arg</span><span class="o">,</span>
+		<span class="nc">SlackAlarmErrorLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">headerMessage</span> <span class="o">=</span>
+				<span class="n">arg</span> <span class="k">instanceof</span> <span class="nc">BusinessException</span> <span class="o">?</span> <span class="no">BUSINESS_EXCEPTION_HEADER_MESSAGE</span> <span class="o">:</span> <span class="no">EXCEPTION_HEADER_MESSAGE</span><span class="o">;</span>
+		
+            <span class="c1">//후략...</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="원하는-exception만-알림-오게-하기">원하는 Exception만 알림 오게 하기</h4>
+
+<p>프로젝트 상에서 모든 Exception들을 @ExceptionHandler로 지정해 놓지 않았기 때문에, 대부분의 Exception은 BusinessException으로 들어온다.</p>
+
+<p>이에 따른 문제점이 logback-slack-appender을 사용할 때와 같이 대부분의 에러가 넘어온다는 것 이었다! (사용자 패스워드 틀림과 같은.. ) 그래서 이 부분을 나름대로 수정해보았다.</p>
+
+<p>Exception 전략에서 ErrorCode를 지정하여 메세지나 상태 코드 등을 지정하는 부분이 있었는데, 커스텀하게 만든 Exception들은 각자의 ErrorCode를 가지도록 개발하였다.</p>
+
+<p>예를 들면,  아래 코드와 같이 구성한다! 자세한건 위의 블로그..</p>
+
+<p>간단히 설명하면, 로직 중 UserHasNotAuthException를 발생 시키면 @ExceptionHandler가 BusinessException을 받아 응답하는 구조이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserHasNotAuthException</span> <span class="kd">extends</span> <span class="nc">BusinessException</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="nf">UserHasNotAuthException</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kd">super</span><span class="o">(</span><span class="nc">ErrorCode</span><span class="o">.</span><span class="na">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+  <span class="no">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">(</span><span class="mi">403</span><span class="o">,</span> <span class="s">"P001"</span><span class="o">,</span> <span class="s">"파일 다운로드 권한이 없습니다."</span><span class="o">),</span>
+  <span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>여기서 ErrorCode ENUM에 <code class="language-plaintext highlighter-rouge">alamable</code> 값을 추가하여 원하는 에러만 알람을 받을 수 있도록 수정해 보았다.</p>
+
+<p><strong>ErrorCode.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+  <span class="no">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">(</span><span class="mi">403</span><span class="o">,</span> <span class="s">"P001"</span><span class="o">,</span> <span class="s">"파일 다운로드 권한이 없습니다."</span><span class="o">,</span> <span class="kc">true</span><span class="o">),</span>
+  <span class="no">OTHER_ERROR</span><span class="o">(</span><span class="mi">500</span><span class="o">,</span> <span class="s">"A001"</span><span class="o">,</span> <span class="s">"..."</span><span class="o">,</span> <span class="kc">false</span><span class="o">),</span>
+  <span class="c1">//...중략</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">alamable</span><span class="o">;</span>
+   <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isAlamable</span><span class="o">(){</span><span class="k">return</span> <span class="n">alamable</span><span class="o">;}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><strong>ExceptionAppender.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">appendExceptionToResponseBody</span><span class="o">(</span><span class="nc">JoinPoint</span> <span class="n">joinPoint</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//...</span>
+
+    <span class="k">if</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="k">instanceof</span> <span class="nc">BusinessException</span><span class="o">){</span>
+
+        <span class="nc">BusinessException</span> <span class="n">exception</span><span class="o">=</span> <span class="o">(</span><span class="nc">BusinessException</span><span class="o">)</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+
+        <span class="k">if</span><span class="o">(!</span><span class="n">exception</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">().</span><span class="na">isAlamable</span><span class="o">()){</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>ExceptionAppender에 위의 코드 if문만 추가해 주었다.</p>
+
+<p>BusinessException 타입인 경우 isAlamable() 함수를 통해 알람을 보낼지 말지 결정한다.</p>
+
+<h4 id="비동기로-동작하는-부분-알림-설정">비동기로 동작하는 부분 알림 설정</h4>
+
+<p>사실 내가 알람 기능을 개발한 이유가 이 비동기로 작동하는 부분 때문인데, 비동기 처리시 발생하는 알림은 오지 않았다.</p>
+
+<p>그러다가 비동기 에러는 따로 설정을 해주어야 한다는 것을 깨닫고 관련 설정을 해주었다.</p>
+
+<p><strong>AsyncConfig.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AsyncConfig</span> <span class="kd">implements</span> <span class="nc">AsyncConfigurer</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Slack</span> <span class="n">slack</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+ 
+    <span class="c1">//....</span>
+    
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="nc">AsyncUncaughtExceptionHandler</span> <span class="nf">getAsyncUncaughtExceptionHandler</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">CustomAsyncExceptionHandler</span><span class="o">(</span><span class="n">slack</span><span class="o">,</span> <span class="n">slackMessageGenerator</span><span class="o">);</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>위의 코드와 같이 getAsyncUncaughtExceptionHandler()를 Override하여 CustomAsyncExceptionHandler를 만들어 주어야 한다. 이 때, 알림 관련 bean들을 주입해 주었다.</p>
+
+<p><strong>CustomAsyncExceptionHandler.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomAsyncExceptionHandler</span> <span class="kd">implements</span> <span class="nc">AsyncUncaughtExceptionHandler</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">Slack</span> <span class="n">slack</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">CustomAsyncExceptionHandler</span><span class="o">(</span><span class="nc">Slack</span> <span class="n">slack</span><span class="o">,</span>
+		<span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">slack</span> <span class="o">=</span> <span class="n">slack</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">slackMessageGenerator</span> <span class="o">=</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleUncaughtException</span><span class="o">(</span>
+		<span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">,</span> <span class="nc">Method</span> <span class="n">method</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">slackMessageGenerator</span><span class="o">.</span><span class="na">generateAsync</span><span class="o">(</span><span class="n">throwable</span><span class="o">,</span><span class="n">method</span><span class="o">);</span>
+		<span class="n">slack</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+		<span class="n">throwable</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>CustomAsyncExceptionHandler에서 비동기 에러가 발생할 시, 메세지를 정의하고 슬랙 알람을 보냈다.</p>
+
+<p>기존에 사용하던 <code class="language-plaintext highlighter-rouge">generate</code>메소드와는 다른 부분이 있어 <code class="language-plaintext highlighter-rouge">generateAsync</code>를 새로 만들어서 사용하였다.</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SlackMessageGenerator</span> <span class="o">{</span>
+<span class="c1">//...</span>
+  <span class="kd">public</span> <span class="nc">String</span> <span class="nf">generateAsync</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">,</span> <span class="nc">Method</span> <span class="n">method</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">headerMessage</span> <span class="o">=</span> <span class="s">"*[Async Exception 발생]*\n"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">currentTime</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">userId</span> <span class="o">=</span> <span class="n">getUserId</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="s">"unknown"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">errorLog</span> <span class="o">=</span> <span class="n">extractMessage</span><span class="o">((</span><span class="nc">Exception</span><span class="o">)</span><span class="n">throwable</span><span class="o">,</span> <span class="nc">SlackAlarmErrorLevel</span><span class="o">.</span><span class="na">ERROR</span><span class="o">);</span>
+			<span class="nc">String</span> <span class="n">methodStr</span> <span class="o">=</span> <span class="s">"METHOD"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">requestURI</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+
+			<span class="k">return</span> <span class="nf">toMessage</span><span class="o">(</span><span class="n">headerMessage</span><span class="o">,</span><span class="n">currentTime</span><span class="o">,</span> <span class="n">userId</span><span class="o">,</span><span class="n">ip</span><span class="o">,</span> <span class="n">errorLog</span><span class="o">,</span> <span class="n">methodStr</span><span class="o">,</span> <span class="n">requestURI</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="no">EXTRACTION_ERROR_MESSAGE</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>동기 통신이었다면, api 경로가 출력됐을텐데, 비동기라 메소드 이름 출력으로 대신하였다.</p>
+
+<h4 id="기타-자잘한-사항">기타 자잘한 사항..</h4>
+
+<p>알람 기능 개발 중 접속자 IP도 확인할 수 있으면 좋을 것 같다는 팀장님의 요청에 간단히 한 줄 추가하였다.</p>
+
+<p>비동기 통신은 ip를 확인 할 수 없어 unknown으로 대신하였다..</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">generate</span><span class="o">(</span><span class="nc">ContentCachingRequestWrapper</span> <span class="n">request</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">arg</span><span class="o">,</span>
+		<span class="nc">SlackAlarmErrorLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">//...</span>
+			<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getRemoteAddr</span><span class="o">();</span>
+    	<span class="c1">//... </span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<p><em>덧, 손너잘님의 코드는  Exception을 처리하는 로직이라 error.log는 잡지 못하는 경우도 처리하고 싶었지만… 이 부분은 과감히 포기했다… 좀 더 생각해 봐야 할 것 같다…</em></p>
+
+<h2 id="본격-후기">본격 후기</h2>
+
+<p>일단 슬랙 알람 만든 나에게 박수 :clap::clap::clap::clap:</p>
+
+<p>좋은 코드 제공해주신 손너잘님 마지막으로 감사합니다 :)</p>
+
+<p>손너잘님의 글을 보면서 spring을 깊게깊게 공부해야겠다는 생각이 빡 들었다.</p>
+
+<p>난 너무 겉핥기야..</p>
+
+<p>조금 더 공부한다면 에러 알림 시 조금씩 발생하는 에러를 쉽게 고칠 수 있지 않을까 생각한다!</p>
+
+<p><del>(request에 가끔 null이 들어오고 이런 문제들… 사실 scope의 문제인걸 알고있지만.. 안되는걸.. )</del></p>
+
+<p>가끔 오는 에러 알림마다 뭔가 반가우면서 조금 짜증나지만 ^^..</p>
+
+<p>즐겁게 발생하는 에러를 수정해야겠다! 후기 끝</p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="Spring" /><category term="logging" /><category term="Slack" /><category term="logback-slack-appender" /><category term="알람" /><summary type="html"><![CDATA[지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.]]></summary></entry><entry><title type="html">2022 맞이 2021 회고</title><link href="http://localhost:4000/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0.html" rel="alternate" type="text/html" title="2022 맞이 2021 회고" /><published>2022-01-03T00:00:00+09:00</published><updated>2022-01-03T00:00:00+09:00</updated><id>http://localhost:4000/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0</id><content type="html" xml:base="http://localhost:4000/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0.html"><![CDATA[<h1 id="2022-맞이-2021-회고">2022 맞이 2021 회고</h1>
+
+<p>12월 즈음 부터 여기저기서 다른 개발자 분들의 회고를 보았다.</p>
+
+<p>다른 분들의 글들을 보면서 과연 나는 2021년에 무엇을 했는가를 생각하게 되었고..</p>
+
+<p>생각만 하다가  나도 글로 남기면 좋을 것 같아 이렇게 글을 작성하게 되었다.</p>
+
+<blockquote>
+  <p>회고를  글로 쓰면 좋을 것 같았던 것 ^^..</p>
+
+  <ul>
+    <li>자기반성</li>
+    <li>자아비판</li>
+    <li>내가 왜그랬을까 후회</li>
+  </ul>
+</blockquote>
+
+<p>첫 회고를 쓰니 간단히 이력을 작성해보자면,</p>
+
+<p>2020년 2월 1일에 현재 회사에 입사했고,</p>
+
+<p>2022년 현재 2년이 1개월 남은,1년 11개월차  백엔드개발자 이다.</p>
+
+<p>입사해서 2개의 프로젝트를 진행하였는데, 하나는 작년에 끝났고 남은 하나는 현재 진행형이다.</p>
+
+<p>과분하게도 좋은 팀장님과 좋은 팀원분들을 만나 꽃밭에서 개발을 경험하고 있다 ^__^</p>
+
+<h2 id="2021년에-나는-무엇을-했는가">2021년에 나는 무엇을 했는가?</h2>
+
+<p>무엇을 ‘했다’ 라고 생각하면 많은데.. 끝낸건 없는 것 같다..</p>
+
+<p>그래도 ‘한 것’에 대해 칭찬과 후회와 반성을 해보자면..</p>
+
+<h3 id="구독-서비스-사이드-프로젝트">구독 서비스 사이드 프로젝트</h3>
+
+<p>친구와 2021년 5월쯔음 부터 시작한 사이드 프로젝트를 그래도 프로토(?), 기본 구조까지는 개발 하였다.</p>
+
+<p>처음에는 호기롭게 도전했지만 점점 손을 놓게 되었다. 찬찬히 왜 손을 놓게 되었는지 생각해 보았는데..</p>
+
+<p>프론트가 정말 재미 없었다.</p>
+
+<p>Next.js와 TypeScript를 사용하여 프론트를 개발했었는데, 생각했던 것 보다 손이 너무 많이 갔다.</p>
+
+<p>만들어야할 기능은 많고.. 막상 만들면 규모가 커지게 되고… 어영부영 하다보니 시간에 맞춰 필요 기능만 개발하게 되고, 디자인 제대로 못하고.. 이게 반복되다보니 뭔가 질리는(?) 느낌이 들었다.</p>
+
+<p>사실 원래 어떤 일을 하면 빠르게 질리긴 한다… 이런점도 고쳐야지..</p>
+
+<p>무튼, 개발을 하면서 즐거웠으면 좋겠는데 프론트를 개발하다 보면 하나도 즐겁지가 않았다. 그래서 1차 질림.</p>
+
+<p>백엔드는 사실 공부하면서 이것저것 도입해 보고 싶은게 많았지만 이것도 제대로 못했던 것 같다.</p>
+
+<p>그냥 빠르게 api만 만들어서 프론트 개발하는 느낌..? 그래서 2차 질림..</p>
+
+<p>이런 상황이다보니 프로젝트에 대한 애정도도 떨어지게 되고.. 친구에게 미안하지만 22년 1월 2일에 친구에게 그만 두겠다는 말을 전했다. 진짜 미안했다…..</p>
+
+<p>잘한 점 : 일단 프로젝트를 시작한 것</p>
+
+<p>못한 점: 시작만 하고 작심삼일 끝마무리를 못한 점. 그리고 잘한 점을 뺀 모든 것..</p>
+
+<h3 id="개인-공부">개인 공부</h3>
+
+<p>회사에서 인프런과 패스트 캠프 강의를 구매해 주었지만, 제대로 완강한건 김영한님의 HTTP 강의밖에 없다..</p>
+
+<p>나머지는 듣다 말다…..</p>
+
+<p>책도 소오올직히 2021년엔 토비의 스프링 1권 완독을 목표로 했었지만.. 이것도……</p>
+
+<p>다른책도 1/10 수준밖에 읽지 않았다… (그냥 안읽었단 소리)</p>
+
+<p>그래도 한게 있다면, 회사 프로젝트를 진행할 때 사용했던 기능을 나름대로 github에 정리했다는 것이다! (칭찬 +1)</p>
+
+<p>초기에는 블로그에 글을 조금씩 쓰기도 했었지만 블로그는 뭔가 부담스러웠다.</p>
+
+<p>나름대로 github에 md 파일로 정리하여 올려보았는데, 생각보다 괜찮은 것 같아,  따로 또 뭔가 일을 벌리지 않는이상 계속 git에만 글을 남길 예정이다!</p>
+
+<p>이 회고도 물론 git에!</p>
+
+<h3 id="회사-업무">회사 업무</h3>
+
+<p>2021년은 정말 다양한 경험을 했던 한 해였다.</p>
+
+<p>물론, 입사한지 1년 갓 넘긴 개발자는 무엇을 하든 경험이었겠지만..</p>
+
+<h4 id="1-멀티모듈">1. 멀티모듈</h4>
+
+<p>사실, 멀티모듈은 내가 했다기 보다는 팀장님이 다 해놓으신걸 보고 아 이런식이구나, 보는것에 만족했다.</p>
+
+<p>그리고 다시 멀티모듈에 관한 우형 세미나를 보며 우리 프로젝트에서 좋았던 점과 아쉬웠던 점을 생각해 보았었다.</p>
+
+<p>좋았던 점은,  의료데이터 + 환자데이터 + 기타 등등등 멀티모듈로 구성이 되어있어 도메인별로 구분이 확실하게 가서 개발하기 편했다.</p>
+
+<p>확실히 전에는 하나의 패키지에 모든 도메인이 집약되어있어 필요한 파일 찾는데 한세월이 걸렸었는데,</p>
+
+<p>지금은 필요한 모듈만 열면 되니 깔끔했다 (<del>알잘딱깔센!</del>)  또한, 공통모듈을 빼서 전체 모듈에 사용했던 것이 좋았다.</p>
+
+<p>매번 모듈마다 새로 만들 필요 없이 의존성을 추가하여 사용하고, 만약 다른 프로젝트를 진행하더라도 그대로 복붙해오면.. 너무 편할것 같다 ^^</p>
+
+<p>아쉬웠던 점은, 초기에는 멀티모듈에 대한 생각이나 인식이 없어 막개발을 했었고 (나만), 그걸 리팩토링 하지 않았다는 점이다(이것도 나만..)</p>
+
+<p>중간중간에 공통적인 기능들(ex 리스트나 테이블 Response들)은 어찌저찌 리팩토링 했지만… 대부분의 코드는 그대로인 것이 보였다.</p>
+
+<p>연말에 문서작업을 하면서 지금까지 짰던 코드들을 보게 되었는데.. 정말 다른 팀원분들 보기 창피해 죽는줄 알았다..^^..</p>
+
+<p>하나더 생각해 보자면 다음 프로젝트에서는 도메인 모듈과 api 모듈을 나눠 개발해 보면 좋겠다는 생각을 조금 해봤다.</p>
+
+<p>개발을 하면서 항상 서비스에 대해 고민을 많이 했었는데, 서비스를 좀더 명확하고 확실한 구분으로 나누면 좋을 것 같다는 생각..?</p>
+
+<p>마지막 genomic 부분을 개발 할 때에는 나름 내가 생각한대로 나눠서 개발을 해봤는데, 확실히 도메인 모듈과 api 모듈, 분석 모듈이 나눠 있었다면 좀더 명확한 멀티 모듈 서비스가 되었지 않았을까 생각을 해보았다.</p>
+
+<p>이거에 대한 단점은 서비스 클래스들이 많아지고.. 뭐.. 등등 이런 저런 문제들이 생기지만.. 일단은 다음프로젝트를 위해 MSA와 멀티모듈을 공부해야겠다.</p>
+
+<h4 id="2-bulk-insert">2. bulk insert</h4>
+
+<p>사실이건 2020년 12월에 했던 부분이지만, 삭제는 2021년에 했으므로..</p>
+
+<p>VEP 툴을 이용해 유전 데이터 분석을 돌리고 결과를 저장하는 부분을 맡았었다. 이 과정에 대한 것도 따로 git에 정리해 올려놓긴 했다!</p>
+
+<p>인간의 유전 데이터 3만줄을 분석하여 20개 정도의 테이블에 나눠서 저장을 하였는데, 어우 90명 돌릴때마다 몇시간씩 걸리니 정말 죽을 맛이었고..</p>
+
+<p>거의 2020년 12월 한달 내내 VEP와 싸웠던 것 같다.</p>
+
+<p>그러다가 JdbcTemplate의 batchUpdate를 사용하여 시간을 획기적으로 줄일 수 있었던..! 감격스런..! 그런 일이 있었다.</p>
+
+<p>그리고 삭제했다…</p>
+
+<p>테이블도 삭제.. 도메인도 삭제.. repository, service 다 삭제삭제… 정말 마음이 아픈.. 좋은 경험만 남은 추억…</p>
+
+<p><del>함께해서 더러웠고 다신 보지 말자 VEP…</del></p>
+
+<h4 id="3-webflux">3. webFlux</h4>
+
+<p>사실 webFlux가 아니라 webClient를 사용하기 위해 webFlux 의존성을 추가한 것이었는데, 진짜 좋은 경험인 것 같다.</p>
+
+<p>사실 어떤 프로젝트에 reactive가 적합한지 잘 모르겠고, 아직은 공부할 마음이 없어.. 아직은(!!) 자세히 공부하지 않을 거지만..</p>
+
+<p>최근 webFlux를 이용한 reactive 프로젝트를 사용하는 기업들이 많아진다고 하니,  맛보기나마 공부할 수 있어서 정말 좋았다.</p>
+
+<h4 id="4-elk">4. ELK</h4>
+
+<p>올해 가장 애착(?)을 갖고 봤던 것이라면, ELK이다!</p>
+
+<p>인간의 유전자는 왜이렇게 많고 복잡한 것일까.. DB에서 데이터를 가져오는데 너무 오래 걸려 ELK를 도입하게 되었다.</p>
+
+<p>결과적으로 시간도 많이 단축되고, 나도 공부할 수 있어서 좋았다.</p>
+
+<p>아쉬웠던 점은 es의 마스터 노드의 최소 사양은 3개라고 하는데, 서버 1대로 운영하였던 부분…? 만약 3개로 마스터 노드를 꾸린다면</p>
+
+<p>얼마나 더 빨라질까!….. 여러모로 ELK로 해보고 싶은게 많아졌다!!!</p>
+
+<h4 id="5-서버-만져보기">5. 서버 만져보기</h4>
+
+<p>올해 개발 베타 서버와 클라우드 서버에 nginx, was, db, jenkins 등등등 구축을 경험해 보았다.</p>
+
+<p>역시 서버는 너무 무섭다. 명령어 하나 칠때마다 손에 땀이 주륵주륵 나고…. 심지어 회고를 쓰는 오늘 회사에 큰 사고를 쳤다…..</p>
+
+<p>회사에서 사용하는 데이터들을 다 날릴 뻔 했다…… 진짜.. 눈물날뻔.. … 팀장님 진짜 죄송하고 감사합니다…</p>
+
+<p>서버를 만질때는 항상 정신 똑바로 차리고!!!!! 눈 크게 뜨고!!!!!  앞으로는 사고 치지 말아야지..</p>
+
+<p>무튼.. 서버를 만져보면서 어떤 방식으로 배포가 되고, 어떻게 알림이 오는지 그런 경험을 할 수 있어 귀중한 기회였다.</p>
+
+<p>다음에 혹시 기회가 된다면 좀더 좋은 방향으로 스크립트나.. 이런 것을 구성해 보고싶다.</p>
+
+<h3 id="운동">운동</h3>
+
+<p>3월인가? 부터 필라테스를 시작하였다. 그리고 7월부터 시작한 재택으로 거의 나가지 않았다 ㅎㅎㅎ..</p>
+
+<p>올해는 주 2~3회 나가는 것을 목표료.. 3월까지 다이어트도 빡세게 해야지!</p>
+
+<h2 id="2022년는-이렇게-살아야겠다">2022년는 이렇게 살아야겠다!</h2>
+
+<p>의지박약, 작심삼일은 내 고질병인거같다. 매년 새해마다 고쳐야지 고쳐야지 생각만 하는데….</p>
+
+<p>올해는 진짜 고쳐야지! 내년 30살의 나에게 의지 개쩌는(^^) 29살의 한 해를 선물해 주고싶다.</p>
+
+<h4 id="1-공부">1. 공부</h4>
+
+<p>공부는 할게 많지만.. 많이 하면 또 질려서 안하게 될거 같으니 목표는 딱 2개만 잡으려고한다.</p>
+
+<ol>
+  <li>3월까지 MSA, 멀티모듈, 클린코드 관련 강의 듣기 -&gt; 적용하기</li>
+  <li>알고리즘 공부 꾸준히 하기</li>
+</ol>
+
+<h4 id="2-업무">2. 업무</h4>
+
+<p>업무때 나만의 룰을 적용해보겠다고 다짐했다.</p>
+
+<ol>
+  <li>Service 부분 코드 작성시 무조건 테스트 코드 작성!</li>
+  <li>Controller, Service, Repository 항상 고민하고, Dto 도 고민하고 만들기 -&gt; 관련 정리 문서 만들기</li>
+</ol>
+
+<h4 id="3-운동">3. 운동</h4>
+
+<p>운동 꾸준히! 식단도 꾸준히!</p>
+
+<p>다른거 다 안바라고, 이 세가지만 완벽하게 이루는 2022년이 되었으면 한다.</p>
+
+<h2 id="덧">덧,</h2>
+
+<ul>
+  <li>
+    <p>항상 고민이 많은 1년이었던 것 같다.</p>
+
+    <p>입사 후 첫 1년은 그래, 신입이니까 이정도로 만족해야지 이렇게 생각했었다면, 그 다음 해 2021년은 나는 어디까지 할 수 있을까? 가 계속 걸렸다.</p>
+
+    <p>주어진 업무를 잘 소화하고, 팀원들과 잘 소통하며 지내는 것이 다가 아니라는 생각을 요즘 문득 하게되었다.</p>
+
+    <p>다른 주니어 분들의 회고를 보면 진짜 능력있으신 분들은 벌써 파트리더도 하고, 다양한 개발도 해보며 실력을 쌓는데 나는 항상 제자리 걸음 같은 느낌..!</p>
+
+    <p>이건 무엇보다 ‘나’의 문제가 크다. MBTI 핑계를 대자면… 나같은 ISFJ들은 정해진 틀에서 벗어나는 걸 싫어한다고 하는데, 내가 딱 그거다.</p>
+
+    <p>그래서 뭔가 시도해보려 하지않고, 시키는 일 열심히 하고.. 딱 거기까지..?</p>
+
+    <p>시키는 일을 넘어 +a를 해야 더 좋은 팀원이고, 더 좋은 개발자겠지..??</p>
+  </li>
+  <li>
+    <p>모 팀원분이 지금 하고 있는 업무에서 자신이 내세울만한 부분을 하나 깊게 파는 것이 좋다고 하셨었다.</p>
+
+    <p>그말이 계속 생각나, 나는 관연 어떤 부분을 깊게 파야 오래 살아남을 수 있나.. 이런 것도 생각해 보았다. 아무래도 JPA나 ELK가 흥미로운데..</p>
+
+    <p>뭔가 머리가 복잡하니 1월에는 이런걸 충분히 고민하는 시간을 가져야겠다..!</p>
+  </li>
+  <li>
+    <p>한번 쭉 회고를 해보니 1년단위는 좀 긴것 같다. 다들 그래서 분기별로 회고를 하나보다.. 나도 월별이든, 분기별이든 주기적인 회고를 도전해 봐야겠다.</p>
+  </li>
+</ul>
+
+<p>이상 나만 읽는 2022년에 쓰는 2021년 회고 끝.</p>
+
+<p>2022년 1월 3일</p>
+
+<blockquote>
+  <p>아무도 읽지 않는 것 같아 쓰자면… 팀장님 항상 진짜 너무 감사하고 또 감사합니다..  우리 팀원분들도 너무 좋아여 짱짱!! 우리 팀원들 짱이다 첫 회사에서 이런게 좋은 팀장님과 팀원분들을 만나서 너무 좋다 진짜 맨날 일하는데 꽃밭이다 짱짱</p>
+</blockquote>]]></content><author><name>doohee94</name></author><category term="회고" /><category term="2021" /><category term="회고" /><summary type="html"><![CDATA[2022 맞이 2021 회고]]></summary></entry><entry><title type="html">특정 API만 Swagger에 노출</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html" rel="alternate" type="text/html" title="특정 API만 Swagger에 노출" /><published>2021-12-16T00:00:00+09:00</published><updated>2021-12-16T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html"><![CDATA[<p>현재 프로젝트에 개발 서버가 2대가 있는데, 이 중 한 서버에서는 특정 API 만 swagger에 노출 해야 하는 문제가 발생하였다.</p>
+
+<p>swagger를 설정 할 때, basepackage를 지정해서 사용하는 방법도 있지만, 그럼 컨트롤러에 있는 모든 API가 노출되기도 하고…별로인 부분이 있어</p>
+
+<p>그보다 좀더 커스텀하게..? 사용 할 수 있는 방법을 찾아 적용해 보았다.</p>
+
+<h2 id="profile-설정">Profile 설정</h2>
+
+<p>아래와 같이 profile을 만들고 각 서버에 맞는 profile에 include 시켜주었다.</p>
+
+<p>(파일을 만들지 않고 바로 넣는것도 가능한…!)</p>
+
+<p>특정 API만 노출해야하는 서버라면 true,  전체 노출 하는 서버라면 false로 지정해준다.</p>
+
+<p><strong>application-dev-open.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">swagger</span><span class="pi">:</span>
+  <span class="na">is-open</span><span class="pi">:</span> <span class="no">true</span> 
+</code></pre></div></div>
+
+<p><strong>application-dev2-open.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">swagger</span><span class="pi">:</span>
+  <span class="na">is-open</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<p>만약 서버를 1대만 운영한다면, 굳이 파일을 만들지 않아도 된다.</p>
+
+<p>profile을 다 만들었다면,  아래와 같이 config 클래스를 만들어 준다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s">"swagger"</span><span class="o">)</span>
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="nd">@ToString</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwaggerProfileConfig</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">Boolean</span> <span class="n">isOpen</span><span class="o">;</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="annotation-생성">Annotation 생성</h2>
+
+<p>open 할 API를 구분해 주기 위하여 어노테이션을 생성해주었다.</p>
+
+<p>특별한 기능은 없고, 그냥 구분용이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Retention</span><span class="o">(</span><span class="nc">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Target</span><span class="o">(</span><span class="nc">ElementType</span><span class="o">.</span><span class="na">METHOD</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">OpenApi</span> <span class="o">{</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="swagger-config-수정">Swagger Config 수정</h2>
+
+<p>swagger에서 api 출력을 설정하는 부분은 <code class="language-plaintext highlighter-rouge">Docket</code> 이다.</p>
+
+<p>SwaggerConfig에 1 부분에서 생성한 SwaggerProfileConfig를 선언해 준후, Docket 부분을 수정한다.</p>
+
+<p>Docket에 아래와 같이 apis 부분에 핸들러만 설정해 주면 된다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nc">Docket</span> <span class="n">docket</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Docket</span><span class="o">(</span><span class="nc">DocumentationType</span><span class="o">.</span><span class="na">SWAGGER_2</span><span class="o">)</span>
+			<span class="o">...</span><span class="na">기존</span> <span class="n">설정</span>
+			<span class="o">.</span><span class="na">apis</span><span class="o">(</span><span class="nc">RequestHandlerSelectors</span><span class="o">.</span><span class="na">basePackage</span><span class="o">(</span><span class="s">"내가 설정한 basepackage"</span><span class="o">))</span>
+			<span class="o">.</span><span class="na">apis</span><span class="o">(</span><span class="n">handler</span> <span class="o">-&gt;</span> <span class="o">{</span>
+				<span class="k">if</span> <span class="o">(</span><span class="nc">Boolean</span><span class="o">.</span><span class="na">TRUE</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">profileConfig</span><span class="o">.</span><span class="na">getIsOpen</span><span class="o">()))</span> <span class="o">{</span> 
+					<span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="na">isAnnotatedWith</span><span class="o">(</span><span class="nc">OpenApi</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+				<span class="o">}</span>
+				<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+			<span class="o">})</span>
+        	<span class="o">...</span><span class="na">나머지</span> <span class="n">설정</span>
+			<span class="o">;</span>
+</code></pre></div></div>
+
+<p>간략히 설명하자면,</p>
+
+<p>basepackage내부의 모든 API를 출력할건데, isOpen이라면, OpenAPi 어노테이션이 붙은 API만 출력한다.</p>
+
+<p>만약 아니라면 전체 다 출력한다.</p>
+
+<h2 id="컨트롤러-부분">컨트롤러 부분</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleController</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">SampleService</span> <span class="n">sampleService</span><span class="o">;</span>
+
+	<span class="nd">@OpenApi</span>
+	<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/sample"</span><span class="o">)</span>
+	<span class="nd">@ResponseStatus</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">findSample</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">sampleService</span><span class="o">.</span><span class="na">findSample</span><span class="o">();</span>
+	<span class="o">}</span>
+    
+	<span class="nd">@GetMapping</span><span class="o">(</span><span class="s">"/sample2"</span><span class="o">)</span>
+	<span class="nd">@ResponseStatus</span><span class="o">(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">findSample2</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">sampleService</span><span class="o">.</span><span class="na">findSample</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>위와 같이 컨트롤러가 구성되어있다고 했을 때,  isOpen이 ture라면, <code class="language-plaintext highlighter-rouge">/sample</code> API 만 swagger에 노출이 되고,</p>
+
+<p>isOpen이 false라면 두 API 모두 출력되는 것을 확인할 수 있다.</p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="Spring" /><category term="swagger" /><category term="REST" /><summary type="html"><![CDATA[현재 프로젝트에 개발 서버가 2대가 있는데, 이 중 한 서버에서는 특정 API 만 swagger에 노출 해야 하는 문제가 발생하였다.]]></summary></entry><entry><title type="html">Spring-Elasticsearch 연동 2 - Query Builder</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html" rel="alternate" type="text/html" title="Spring-Elasticsearch 연동 2 - Query Builder" /><published>2021-12-09T00:00:00+09:00</published><updated>2021-12-09T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2%20-Query-%EC%9E%91%EC%84%B1</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html"><![CDATA[<h2 id="유용한-참고자료">유용한 참고자료</h2>
+
+<ul>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high.html"><strong>Java High Level Rest Client 사용 정리 guide</strong></a></li>
+</ul>
+
+<h2 id="1-기본-사용법">1. 기본 사용법</h2>
+
+<p>Spring Elasticsearch 연동 1과 같이 설정을 완료하였다면, 바로 호출해서 사용가능하다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchService</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">RestHighLevelClient</span> <span class="n">client</span><span class="o">;</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">INDEX</span> <span class="o">=</span> <span class="s">"my_index"</span><span class="o">;</span>
+	
+    <span class="kd">public</span> <span class="nc">SearchResponse</span> <span class="nf">sampleQuery</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		
+        <span class="nc">SearchSourceBuilder</span> <span class="n">searchSourceBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchSourceBuilder</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">query</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">matchAllQuery</span><span class="o">())</span>
+        <span class="c1">//  .aggregation() // 필요할 경우 사용</span>
+            <span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> 
+      
+		<span class="nc">SearchRequest</span> <span class="n">searchRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchRequest</span><span class="o">(</span><span class="no">INDEX</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">source</span><span class="o">(</span><span class="n">searchSourceBuilder</span><span class="o">);</span>
+		
+        <span class="nc">SearchResponse</span> <span class="n">searchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">search</span><span class="o">(</span><span class="n">searchRequest</span><span class="o">,</span> <span class="nc">RequestOptions</span><span class="o">.</span><span class="na">DEFAULT</span><span class="o">);</span>
+        
+		<span class="k">return</span> <span class="n">searchResponse</span><span class="o">;</span>
+	<span class="o">}</span>
+    
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>위의 코드는 하단의 쿼리를 수행한 것과 같다.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET</span><span class="w"> </span><span class="err">/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">	</span><span class="nl">"size"</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"match_all"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>이런식으로 query, aggregtion, size를 만들어 원하는 쿼리를 작성 한 후, <code class="language-plaintext highlighter-rouge">SearchRequest</code>를 생성한다.</p>
+
+<p>그 후, <code class="language-plaintext highlighter-rouge">client.search()</code>를 통해 쿼리를 보내고, 그 응답을 <code class="language-plaintext highlighter-rouge">SearchResponse</code>로 받게된다.</p>
+
+<h2 id="2-query-만들기">2. Query 만들기</h2>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">my_index</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+				</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+						</span><span class="s2">"ABC"</span><span class="p">,</span><span class="w">
+						</span><span class="s2">"BCD"</span><span class="w">
+					</span><span class="p">]</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"exists"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a_field"</span><span class="w">
+				
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"exists"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"b_field"</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"c_field"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+						</span><span class="s2">"AAAA"</span><span class="w">
+					</span><span class="p">]</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">}]</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+	</span><span class="p">},</span><span class="w">
+	</span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"agg_a_field"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a_field"</span><span class="p">,</span><span class="w">
+				</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w">
+				</span><span class="nl">"order"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+					</span><span class="nl">"name_count.value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"desc"</span><span class="w">
+				</span><span class="p">}]</span><span class="w">
+			</span><span class="p">},</span><span class="w">
+			</span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"name_count"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"cardinality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name"</span><span class="w">
+					</span><span class="p">}</span><span class="w">
+				</span><span class="p">},</span><span class="w">
+				</span><span class="nl">"paging"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+					</span><span class="nl">"bucket_sort"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"sort"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+						</span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+						</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="w">
+					</span><span class="p">}</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">}</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+	</span><span class="p">},</span><span class="w">
+	</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>위의 elasticsearch 쿼리를 SearchSourceBuilder로 변환하면, 아래의 코드와 같아진다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchService</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">RestHighLevelClient</span> <span class="n">client</span><span class="o">;</span>
+
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">INDEX</span> <span class="o">=</span> <span class="s">"my_index"</span><span class="o">;</span>
+	
+    <span class="c1">//전체 쿼리 처리 </span>
+    <span class="kd">public</span> <span class="nc">SearchResponse</span> <span class="nf">sampleQuery</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">names</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">cFields</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+		
+        <span class="nc">SearchSourceBuilder</span> <span class="n">searchSourceBuilder</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchSourceBuilder</span><span class="o">()</span>
+            <span class="o">.</span><span class="na">query</span><span class="o">(</span><span class="n">myQuery</span><span class="o">(</span><span class="n">names</span><span class="o">,</span> <span class="n">cFields</span><span class="o">))</span>
+            <span class="o">.</span><span class="na">aggregation</span><span class="o">(</span><span class="n">myAggregation</span><span class="o">())</span> 
+            <span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span> 
+      
+		<span class="nc">SearchRequest</span> <span class="n">searchRequest</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">SearchRequest</span><span class="o">(</span><span class="no">INDEX</span><span class="o">)</span>
+            <span class="o">.</span><span class="na">source</span><span class="o">(</span><span class="n">searchSourceBuilder</span><span class="o">);</span>
+		
+        <span class="nc">SearchResponse</span> <span class="n">searchResponse</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">search</span><span class="o">(</span><span class="n">searchRequest</span><span class="o">,</span> <span class="nc">RequestOptions</span><span class="o">.</span><span class="na">DEFAULT</span><span class="o">);</span>
+        
+		<span class="k">return</span> <span class="n">searchResponse</span><span class="o">;</span>
+	<span class="o">}</span>
+    
+    <span class="c1">//query 부분</span>
+    <span class="kd">private</span> <span class="nc">QueryBuilder</span> <span class="nf">myQuery</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">names</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span><span class="n">cFields</span><span class="o">){</span>
+			<span class="k">return</span> <span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">boolQuery</span><span class="o">()</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">termsQuery</span><span class="o">(</span><span class="s">"name"</span><span class="o">,</span> <span class="n">names</span><span class="o">))</span>  <span class="c1">//names = ["ABC","BCD"]</span>
+				<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">existsQuery</span><span class="o">(</span><span class="s">"a_field"</span><span class="o">))</span>
+				<span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">existsQuery</span><span class="o">(</span><span class="s">"b_field"</span><span class="o">))</span>
+                <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="nc">QueryBuilders</span><span class="o">.</span><span class="na">termsQuery</span><span class="o">(</span><span class="s">"c_field"</span><span class="o">,</span> <span class="n">cFields</span><span class="o">))</span> <span class="c1">//cFields = ["AAAA"]</span>
+				<span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//aggregation 부분</span>
+    <span class="kd">private</span> <span class="nc">TermsAggregationBuilder</span> <span class="nf">myAggregation</span><span class="o">(){</span>
+
+			<span class="nc">CardinalityAggregationBuilder</span> <span class="n">nameCardinalityAggs</span> <span class="o">=</span> <span class="nc">AggregationBuilders</span>
+				<span class="o">.</span><span class="na">cardinality</span><span class="o">(</span><span class="s">"name_count"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+        
+			<span class="nc">BucketSortPipelineAggregationBuilder</span> <span class="n">paging</span> <span class="o">=</span> <span class="nc">PipelineAggregatorBuilders</span>
+				<span class="o">.</span><span class="na">bucketSort</span><span class="o">(</span><span class="s">"paging"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;())</span>
+				<span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">20</span><span class="o">);</span>
+        
+			<span class="k">this</span><span class="o">.</span><span class="na">aggregationBuilder</span> <span class="o">=</span> <span class="nc">AggregationBuilders</span>
+				<span class="o">.</span><span class="na">terms</span><span class="o">(</span><span class="s">"agg_a_field"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">field</span><span class="o">(</span><span class="s">"a_field"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">order</span><span class="o">(</span><span class="nc">BucketOrder</span><span class="o">.</span><span class="na">aggregation</span><span class="o">(</span><span class="s">"name_count.value"</span><span class="o">,</span> <span class="kc">false</span><span class="o">))</span> <span class="c1">//name_count의 value의 내림차순으로 정렬</span>
+				<span class="o">.</span><span class="na">size</span><span class="o">(</span><span class="mi">10000</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">subAggregation</span><span class="o">(</span><span class="n">nameCardinalityAggs</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">subAggregation</span><span class="o">(</span><span class="n">paging</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="3-응답-처리">3. 응답 처리</h2>
+
+<p>위의 쿼리를 실행시키면 아래와 같은 응답이 출력된다. (필요 부분만 표기)</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"took"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">197</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timed_out"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"_shards"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span><span class="w">
+  </span><span class="nl">"hits"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="err">...</span><span class="p">},</span><span class="w">
+  </span><span class="nl">"aggregations"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"agg_a_field"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"buckets"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"key"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"doc_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name_count"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+        </span><span class="err">//후략</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>간단히 출력을 설명하자면, query를 수행한 후, a_field를 가지고 있는 name의 수가 많은 순으로 출력한 것이다.</p>
+
+  <p>select a_field, count(distinct name) from my_index where {query 조건} group by a_field order by count(distinct name) desc;</p>
+
+  <p>a_filed의 데이터 타입이 number이기 때문에 nubmer형식으로 표기되었다.</p>
+</blockquote>
+
+<p><code class="language-plaintext highlighter-rouge">SearchResponse</code>로 받게 되면, 객체로 넘어오게 되는데 필요한 부분을 사용하기 위해 파싱이 필요하였다.</p>
+
+<p>내가 원하는 정보는 buckets 배열에 있는 key(a_field의 값)과 name_count의 value 부분이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Getter</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticResponse</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Long</span><span class="o">,</span> <span class="nc">Long</span><span class="o">&gt;</span> <span class="n">data</span><span class="o">;</span> <span class="c1">// a_filed, name_count 값을 map으로 저장 </span>
+
+	<span class="kd">public</span> <span class="nf">ElasticResponse</span><span class="o">(</span><span class="nc">SearchResponse</span> <span class="n">searchResponse</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>
+
+		<span class="nc">Terms</span> <span class="n">terms</span> <span class="o">=</span> <span class="n">searchResponse</span><span class="o">.</span><span class="na">getAggregations</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"agg_a_field"</span><span class="o">);</span>
+
+		<span class="k">for</span> <span class="o">(</span><span class="nc">Terms</span><span class="o">.</span><span class="na">Bucket</span> <span class="n">bucket</span> <span class="o">:</span> <span class="n">terms</span><span class="o">.</span><span class="na">getBuckets</span><span class="o">())</span> <span class="o">{</span>
+			<span class="nc">Long</span> <span class="n">a_field</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Long</span><span class="o">)</span><span class="n">bucket</span><span class="o">.</span><span class="na">getKey</span><span class="o">();</span>
+			<span class="nc">Cardinality</span> <span class="n">nameCount</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="na">getAggregations</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="s">"name_count"</span><span class="o">);</span>
+
+			<span class="k">this</span><span class="o">.</span><span class="na">data</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">a_field</span><span class="o">,</span> <span class="n">nameCount</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>사실 파싱하는 로직을 짜면서 이게 왜 이렇게 해야하나 시행착오가 많았는데, 지금 보니 조금 알 것같기도 하다…</p>
+
+<ol>
+  <li>실행 쿼리의 aggregation 부분에 <code class="language-plaintext highlighter-rouge">agg_a_field</code> 가 terms Query로 구성되어 있어, searchResponse의 <code class="language-plaintext highlighter-rouge">aggregations </code>필드에서도 <code class="language-plaintext highlighter-rouge">Terms</code>객체로 <code class="language-plaintext highlighter-rouge">agg_a_field</code>를 받는다.</li>
+  <li>각 terms 안에 name_count를 찾는 부분도 Cardinality로 되어있으니 name_count도 마찬가지로 <code class="language-plaintext highlighter-rouge">Cardinality</code>로 객체를 받는다.</li>
+  <li>받아서 원하는 데이터를 찾아 가공한다.</li>
+</ol>
+
+<p>내가 이해한게 맞는건지는 잘 모르겠지만.. 틀린다면 추후 글을 수정해야겠다 :(</p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="Docker" /><category term="elasticsearch" /><category term="logstash" /><category term="kibana" /><category term="Spring" /><summary type="html"><![CDATA[유용한 참고자료]]></summary></entry><entry><title type="html">Spring-Elasticsearch 연동 1- Spring 설정</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html" rel="alternate" type="text/html" title="Spring-Elasticsearch 연동 1- Spring 설정" /><published>2021-12-09T00:00:00+09:00</published><updated>2021-12-09T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html"><![CDATA[<h2 id="유용한-참고자료">유용한 참고자료</h2>
+
+<ul>
+  <li>
+    <p><a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-java-builders.html"><strong>elasticsearch java builder 모음</strong></a></p>
+  </li>
+  <li>
+    <p><a href="https://elsboo.tistory.com/6"><strong>spring-data-elasitcsearch VS rest-high-level-client</strong></a></p>
+  </li>
+</ul>
+
+<h2 id="기본-설정">기본 설정</h2>
+
+<h3 id="의존성-추가">의존성 추가</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.15.0'
+compile 'org.elasticsearch.client:elasticsearch-rest-client:7.15.0'
+compile 'org.elasticsearch:elasticsearch:7.15.0'
+</code></pre></div></div>
+
+<p>elasticsearch버전에 맞춰 의존성을 추가해 준다.</p>
+
+<p>spring 에서 elasticsearch를 사용할 때, JPA와 같이 spring-data를 사용하느냐, client를 두고 쿼리를 직접 작성하느냐로 갈린다. 결론부터 말하자면 나는 high-leve-client를 이용하였다.</p>
+
+<p>간편하게 하용하려면 <strong>spring-data</strong>를 사용하여 처리하면 될 것같지만, 버전에 따라 변동이 심하다 하기도 하고.. 내가 수행하려는 쿼리가 간편하진 않아서 사용하진 않았다. 쿼리 결과가 직접 객체에 매핑되는 부분이 아쉽긴 했다..</p>
+
+<p>client를 둔다면, low-level이냐, high-level이냐로 갈리게 된다.</p>
+
+<p><strong>low-level</strong>의 경우 직접 요청을 만들어서 호출하는 방식인데, 사실 이건 사용해본적이 없어서 잘 모르겠다. 쿼리를 한줄한줄 직접 타이핑하는 방식으로 보인다.</p>
+
+<p><strong>high-level</strong>의 경우 쿼리빌더를 생성하여 쿼리를 작성할 수 있다. elasticsearch에서 다양한 쿼리빌더(거의 모두..?)를 제공해주고 있으며, 상황에 맞게 끼워 넣기만하여 편하게 쿼리를 작성할 수 있었다.</p>
+
+<p>엘라스틱에서는 high-level-client를 밀어주고 있다고 한다.</p>
+
+<h3 id="application-elkyml">application-elk.yml</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">elasticsearch</span><span class="pi">:</span>
+  <span class="na">host</span><span class="pi">:</span> <span class="s">localhost</span>
+  <span class="na">port</span><span class="pi">:</span> <span class="m">9200</span>
+  <span class="na">api_key</span><span class="pi">:</span> <span class="s">key</span>
+
+<span class="na">spring</span><span class="pi">:</span>
+  <span class="na">profiles</span><span class="pi">:</span>
+    <span class="na">active</span><span class="pi">:</span> <span class="s">elk</span>
+</code></pre></div></div>
+
+<h3 id="elasticsearchpropertyjava">ElasticsearchProperty.java</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="nd">@ConfigurationProperties</span><span class="o">(</span><span class="n">prefix</span> <span class="o">=</span> <span class="s">"elasticsearch"</span><span class="o">)</span>
+<span class="nd">@Getter</span>
+<span class="nd">@Setter</span>
+<span class="nd">@ToString</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchProperty</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">host</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kt">int</span> <span class="n">port</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">apiKey</span><span class="o">;</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>편한 설정을 위하여 yml 파일을 만들고 프로퍼티를 생성해주었다.</p>
+
+<p>host와 port는 elasticsearch가 구동되고 있는 서버IP와 포트번드롤 입력해주면 되고,</p>
+
+<p>apiKey와 관련한 것은 elk-security 관련 자료를 찾아보면 생성할 수 있다. (<code class="language-plaintext highlighter-rouge">개인공부정리/ELK_Security_설정.md</code>)</p>
+
+<h3 id="elasticsearchconfigjava">ElasticsearchConfig.java</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="nd">@Slf4j</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ElasticsearchConfig</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">ElasticsearchProperty</span> <span class="n">property</span><span class="o">;</span>
+
+	<span class="nd">@Bean</span>
+	<span class="kd">public</span> <span class="nc">RestHighLevelClient</span> <span class="nf">getRestClient</span><span class="o">()</span> <span class="o">{</span>
+
+		<span class="nc">String</span> <span class="n">host</span> <span class="o">=</span> <span class="n">property</span><span class="o">.</span><span class="na">getHost</span><span class="o">();</span>
+		<span class="kt">int</span> <span class="n">port</span> <span class="o">=</span> <span class="n">property</span><span class="o">.</span><span class="na">getPort</span><span class="o">();</span>
+		<span class="nc">String</span> <span class="n">apiKey</span> <span class="o">=</span> <span class="n">property</span><span class="o">.</span><span class="na">getApiKey</span><span class="o">();</span>
+
+		<span class="nc">HttpHost</span> <span class="n">httpHost</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpHost</span><span class="o">(</span><span class="n">host</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="s">"http"</span><span class="o">);</span>
+
+		<span class="nc">Header</span><span class="o">[]</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Header</span><span class="o">[]{</span><span class="k">new</span> <span class="nc">BasicHeader</span><span class="o">(</span><span class="s">"Authorization"</span><span class="o">,</span> <span class="s">"ApiKey "</span> <span class="o">+</span> <span class="n">apiKey</span><span class="o">)};</span>
+
+
+		<span class="nc">RestClientBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">RestClient</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">httpHost</span><span class="o">)</span>
+			<span class="o">.</span><span class="na">setRequestConfigCallback</span><span class="o">(</span>
+				<span class="n">requestConfigBuilder</span> <span class="o">-&gt;</span> <span class="n">requestConfigBuilder</span>
+					<span class="o">.</span><span class="na">setConnectTimeout</span><span class="o">(</span><span class="mi">30000</span><span class="o">)</span>
+					<span class="o">.</span><span class="na">setSocketTimeout</span><span class="o">(</span><span class="mi">300000</span><span class="o">))</span>
+			<span class="o">.</span><span class="na">setHttpClientConfigCallback</span><span class="o">(</span>
+				<span class="n">httpClientBuilder</span> <span class="o">-&gt;</span> <span class="n">httpClientBuilder</span>
+					<span class="o">.</span><span class="na">setConnectionReuseStrategy</span><span class="o">((</span><span class="n">response</span><span class="o">,</span> <span class="n">context</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kc">true</span><span class="o">)</span>
+					<span class="o">.</span><span class="na">setKeepAliveStrategy</span><span class="o">(((</span><span class="n">response</span><span class="o">,</span> <span class="n">context</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">300000</span><span class="o">))</span>
+					<span class="o">.</span><span class="na">setDefaultHeaders</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">headers</span><span class="o">))</span>
+					<span class="o">.</span><span class="na">setDefaultIOReactorConfig</span><span class="o">(</span><span class="nc">IOReactorConfig</span><span class="o">.</span><span class="na">custom</span><span class="o">()</span>
+						<span class="o">.</span><span class="na">setIoThreadCount</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+						<span class="o">.</span><span class="na">build</span><span class="o">())</span>
+
+			<span class="o">);</span>
+       
+		<span class="k">return</span> <span class="k">new</span> <span class="nf">RestHighLevelClient</span><span class="o">(</span><span class="n">builder</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>ElasticsearchConfig 파일을 생성하여 RestHighLevelClient Bean을 생성해주어야한다.</p>
+
+<p>이 설정에서 응답의 timeout이나, security관련 헤더 설정, 쓰레드 설정 등을 해줄 수 있다.</p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="Docker" /><category term="elasticsearch" /><category term="logstash" /><category term="kibana" /><category term="Spring" /><summary type="html"><![CDATA[유용한 참고자료]]></summary></entry><entry><title type="html">Spring Batch Insert 어떻게 해결했을까</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html" rel="alternate" type="text/html" title="Spring Batch Insert 어떻게 해결했을까" /><published>2021-12-09T00:00:00+09:00</published><updated>2021-12-09T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html"><![CDATA[<p>대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.</p>
+
+<p>한 파일당 약 3만줄의 데이터를 파싱해서 20개의 테이블에 나눠 저장을 하였다. 파일은 모두 90개였던 것으로 기억한다. (전체 저장 데이터가 5G정도 나왔었다.)</p>
+
+<p>다 저장해보니 용량이 어마무시했던 기억이 있는데, 지금은 사용하지 않아 없어졌다.</p>
+
+<p>하지만 Spring Batch Insert를 도전했던 좋은 추억이라 (^^) 기록을 해보려 한다.</p>
+
+<h2 id="jdbctemplate-bulk-insert-활용기">JdbcTemplate Bulk Insert 활용기</h2>
+
+<h3 id="기본-사용-방법">기본 사용 방법</h3>
+
+<p>bulk insert를 위해 batchUpdate() 함수를 사용하였다. 기본 사용 방법은 아래와 같다.</p>
+
+<pre><code class="language-JAVA">@RequiredArgsConstructor
+public class SampleJdbcTemplateRepository {
+
+  private final JdbcTemplate jdbcTemplate;
+
+  public void batchInsert(List&lt;SampleDto&gt; temp) {
+
+    jdbcTemplate.batchUpdate("INSERT INTO sample_table ("
+            + "a,\n"
+            + "b )"
+            + "VALUES (?,?)",
+        new BatchPreparedStatementSetter() {
+          @Override
+          public void setValues(PreparedStatement ps, int i) throws SQLException {
+
+            ps.setObject(1, temp.get(i).getA(), Types.VARCHAR);
+            ps.setObject(2, temp.get(i).getB(), Types.VARCHAR);
+
+          }
+
+          @Override
+          public int getBatchSize() {
+            return temp.size();
+          }
+        });
+  }
+
+}
+</code></pre>
+
+<h3 id="어떻게-활용했나">어떻게 활용했나</h3>
+
+<p>이 <a href="https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Batch-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/">블로그</a>를 참고하여 코드를 작성하였다.</p>
+
+<p>서론에서 언급했지만 테이블이 약 20개에, 모두 연관관계로 매핑되어있었고, 데이터의 양도 많았기 때문에..</p>
+
+<blockquote>
+  <ol>
+    <li>저장할 전체 리스트를 지정한 batchSize만큼 자른다</li>
+    <li>자른 리스트를 batchInsert 시킨다.</li>
+    <li>마지막 남은 리스트도 마저 insert 시킨다.</li>
+  </ol>
+</blockquote>
+
+<p>이 로직을 그대로 이용하였다.</p>
+
+<p>이 로직 중, 저장할 전체 리스트를 자르고 batchInsert함수를 호출하는 부분은 모든 테이블에 반복 적용되니 추상 클래스를 만들어 필요한 부분에 상속시켜주었다.</p>
+
+<h4 id="samplejdbctemplatejava">SampleJdbcTemplate.java</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">SampleJdbcTemplate</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span> <span class="c1">// T에는 batchInsert를 하고싶은 도메인 </span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">;</span>
+
+  <span class="nd">@Transactional</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">save</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">dataList</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="kt">int</span> <span class="n">batchCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span><span class="c1">// insert 총 횟수 확인을 위한 변수 </span>
+
+    <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">temp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">dataList</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+
+      <span class="n">temp</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">dataList</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+
+      <span class="k">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="no">BATCH_SIZE</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">batchCount</span> <span class="o">=</span> <span class="n">vepBatchInsert</span><span class="o">(</span><span class="n">batchCount</span><span class="o">,</span> <span class="n">temp</span><span class="o">);</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="k">if</span> <span class="o">(!</span><span class="n">temp</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+      <span class="n">batchCount</span> <span class="o">=</span> <span class="n">vepBatchInsert</span><span class="o">(</span><span class="n">batchCount</span><span class="o">,</span> <span class="n">temp</span><span class="o">);</span> <span class="c1">//for문을 벗어나고 남은 데이터가 존재하면 나머지 insert</span>
+    <span class="o">}</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"batchCount : "</span> <span class="o">+</span> <span class="n">batchCount</span><span class="o">);</span> 
+
+  <span class="o">}</span>
+
+  <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">int</span> <span class="nf">batchInsert</span><span class="o">(</span><span class="kt">int</span> <span class="n">batchCount</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">temp</span><span class="o">);</span> <span class="c1">// 각 쿼리 실행을 위한 abstract 함수 </span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="sampledtojdbcjava">SampleDtoJdbc.java</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Repository</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleDtoJdbc</span> <span class="kd">extends</span> <span class="nc">SampleJdbcTemplate</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">;;</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">protected</span> <span class="kt">int</span> <span class="nf">batchInsert</span><span class="o">(</span><span class="kt">int</span> <span class="n">batchCount</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">temp</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">batchUpdate</span><span class="o">(</span><span class="s">"INSERT INTO sample_table ("</span>
+            <span class="o">+</span> <span class="s">"a,\n"</span>
+            <span class="o">+</span> <span class="s">"b )"</span>
+            <span class="o">+</span> <span class="s">"VALUES (?,?)"</span><span class="o">,</span>
+        <span class="k">new</span> <span class="nf">BatchPreparedStatementSetter</span><span class="o">()</span> <span class="o">{</span>
+          <span class="nd">@Override</span>
+          <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setValues</span><span class="o">(</span><span class="nc">PreparedStatement</span> <span class="n">ps</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">SQLException</span> <span class="o">{</span>
+
+            <span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">temp</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getA</span><span class="o">(),</span> <span class="nc">Types</span><span class="o">.</span><span class="na">VARCHAR</span><span class="o">);</span>
+            <span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">temp</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getB</span><span class="o">(),</span> <span class="nc">Types</span><span class="o">.</span><span class="na">VARCHAR</span><span class="o">);</span>
+
+          <span class="o">}</span>
+
+          <span class="nd">@Override</span>
+          <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getBatchSize</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+          <span class="o">}</span>
+        <span class="o">});</span>
+
+    <span class="n">temp</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span> <span class="c1">// temp list를 비워준다. </span>
+    <span class="n">batchCount</span><span class="o">++;</span> <span class="c1">//insert가 완료되면, 총 횟수에 1을 더해준다. </span>
+
+    <span class="k">return</span> <span class="n">batchCount</span><span class="o">;</span>
+  <span class="o">}</span>
+
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>해당 함수는 insert가 필요한 모든 테이블에 대해 생성해 주었다.</p>
+
+<h3 id="그래서-bulk-insert-batch-insert가-뭐야">그래서 Bulk Insert? Batch Insert가 뭐야?</h3>
+
+<p>말 그대로 많은 양의 데이터를 Insert하는 것이다.</p>
+
+<p>JPA의 saveAll을 이용하면 데이터 리스트의 저장가능하지만, 이런 방식으로 insert를 했다간..</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_table</span> <span class="p">(</span><span class="o">~~~</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="o">~~~</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>이런 쿼리가 수백, 수천만건 반복될 것이다 -&gt; 시간이 오래걸린다.</p>
+
+<p>내가 저장했던 데이터를 JPA SaveAll을 이용하여 저장 했을 시 <u>2시간</u> 이상 걸렸던 것으로 기억한다..</p>
+
+<p>그래서 spring에서 batch-insert를 지원한다고 하여 사용해 봤었지만.. 내가 원하는 기능은 아니었다. <a href="https://jaehun2841.github.io/2020/11/22/2020-11-22-spring-data-jpa-batch-insert/#hibernateorder_inserts-hibernateorder_updates">참고</a></p>
+
+<p>내가 지정한 id의 생성 방식도 <u>strategy = GenerationType.IDENTITY</u> 이렇게 지정했었을 뿐더러</p>
+
+<p>batch-insert도 property에서 지정한 batch-size에 맞게 insert를 묶어서 보내주는 방식일 뿐 아래와 같은 형식은 아니었다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="p">(</span><span class="o">~~~~</span><span class="p">)</span> <span class="k">VALUES</span> 
+<span class="p">(</span><span class="o">~~~~~</span><span class="p">),</span>
+<span class="p">(</span><span class="o">~~~~~~</span><span class="p">),</span>
+<span class="p">(</span><span class="o">~~~~~~</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>batch-size를 지정하여 저장하였을 때는 약 <u>1시간</u> 정도의 시간이 소요되었다.</p>
+
+<p><strong>그럼 JdbcTamplate를 이용했을때는?</strong></p>
+
+<p>이 <a href="https://wave1994.tistory.com/160">블로그</a>를 참고해보면 Hibernate에서는 insert가 단 건으로 처리되지만, DB driver에서 해당 쿼리들을 모아 batch insert를 시켜준다고 한다.</p>
+
+<p>JdbcTamplate을 사용했을 때는 <u>20분~30분</u>의 시간이 소요되었다. <del>정말 눈에 띄게 시간이 단축되어 성공했을때 울뻔했다..</del></p>
+
+<h2 id="후기">후기</h2>
+
+<p>사실 작년에 작성했던 코드라 잘 기억도 안나고.. 기록도 거의 안남아서 힘들었다는 기억밖에 없었는데,</p>
+
+<p>글로 한번 정리하면서 관련 글도 읽고하니 새로운 사실도 알게 되어서 정리하길 잘했다는 생각이 든다.</p>
+
+<p>유전 데이터 분석 기능 구현부터 분석 결과 저장까지 약 한 달 정도의 시간이 걸렸던 것 같은데 이렇게 좋은 경험을 쌓을 수 있어서 나름 좋은 것 같다.</p>
+
+<p>관련 기능이 없어져서 관련한 모든 것들이 사라져서 조금 아쉽긴하네…</p>
+
+<p><del><em>하지만 함께해서 별로였고 다신 내가 쓰는 데이터로 만나지 말자 VEP.. ^^..</em></del></p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="JdbcTemplate" /><category term="Spring" /><category term="Bulk Insert" /><summary type="html"><![CDATA[대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.]]></summary></entry><entry><title type="html">ELK Security 설정</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html" rel="alternate" type="text/html" title="ELK Security 설정" /><published>2021-11-04T00:00:00+09:00</published><updated>2021-11-04T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html"><![CDATA[<h2 id="유용한-참고자료">유용한 참고자료</h2>
+
+<p><a href="https://ddoniblog.tistory.com/33?category=867457">security 적용 기본(username + password)</a></p>
+
+<p><a href="https://ddoniblog.tistory.com/34?category=867457">security api key 적용</a></p>
+
+<p>elasticsearch 무료버전인 basic license에서 security 기능은 api-key 관리 기능까지 제공을 한다. <a href="https://www.elastic.co/kr/subscriptions">참고</a></p>
+
+<p>이에 맞는 elk security 설정을 정리해 보았다.</p>
+
+<h2 id="1-config-파일-설정">1. config 파일 설정</h2>
+
+<p>elk를 설치한 후에는 자동으로 <code class="language-plaintext highlighter-rouge">elastic</code>이라는 username이 생성되는 것 같다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">elasitc</code>은 <strong><code class="language-plaintext highlighter-rouge">superuser</code></strong> 권한으로 모든 인덱스 및 데이터를 포함하여 클러스터에 대한 전체 액세스 권한을 부여한다. <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.15/built-in-roles.html">참고</a></p>
+
+<p>logstash나 kibana를 설정할 때, 다른 user를 만들어 설정할 수 있을 것 같지만 우선 <code class="language-plaintext highlighter-rouge">elastic</code>을 사용하여 설정하였다.</p>
+
+<h3 id="1-1-docker-composeyml-파일-설정">1-1. docker-compose.yml 파일 설정</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$vi {PATH}/docker-elk/docker-compose.yml
+</code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">..</span>
+ <span class="s">elasticsearch</span><span class="err">:</span>
+   <span class="s">...</span>
+    <span class="s">environment</span><span class="err">:</span>
+     <span class="s">...</span>
+      <span class="s">ELASTIC_PASSWORD</span><span class="err">:</span> <span class="s">password</span> 
+<span class="s">..</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">ELASTIC_PASSWORD</code>에 기존에 있던 password를 지우고 원하는 password를 설정한다.</p>
+
+<p>이 password는 <code class="language-plaintext highlighter-rouge">elastic</code> username의 password이다.</p>
+
+<h3 id="1-2-elasitcsearchyml-파일-설정">1-2. elasitcsearch.yml 파일 설정</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ vi {PATH}/doceker-elk/elasticserch/config/elasitcsearch.yml 
+</code></pre></div></div>
+
+<p>기존 파일에 security 설정 추가</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#security</span>
+<span class="na">xpack.license.self_generated.type</span><span class="pi">:</span> <span class="s">basic</span>
+<span class="na">xpack.security.enabled</span><span class="pi">:</span> <span class="no">true</span>
+<span class="na">xpack.monitoring.collection.enabled</span><span class="pi">:</span> <span class="no">true</span>
+<span class="na">xpack.security.authc.api_key.enabled</span><span class="pi">:</span> <span class="no">true</span> <span class="c1">#apiKey 사용설정.</span>
+</code></pre></div></div>
+
+<h3 id="1-3-logstashyml-파일-설정">1-3. logstash.yml 파일 설정</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ vi {PATH}/doceker-elk/logstash/config/logstash.yml 
+</code></pre></div></div>
+
+<p>기존 파일에 security 설정 추가</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#security</span>
+<span class="na">xpack.monitoring.enabled</span><span class="pi">:</span> <span class="no">true</span>
+<span class="na">xpack.monitoring.elasticsearch.username</span><span class="pi">:</span> <span class="s">elastic</span>
+<span class="na">xpack.monitoring.elasticsearch.password</span><span class="pi">:</span> <span class="s">password</span>
+</code></pre></div></div>
+
+<h3 id="1-4-kibanayml-파일-설정">1-4. kibana.yml 파일 설정</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ vi {PATH}/doceker-elk/kibana/config/kibana.yml 
+</code></pre></div></div>
+
+<p>기존 파일에 security 설정 추가</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#security</span>
+<span class="na">elasticsearch.username</span><span class="pi">:</span> <span class="s">elastic</span>
+<span class="na">elasticsearch.password</span><span class="pi">:</span> <span class="s">password</span>
+<span class="na">xpack.security.encryptionKey</span><span class="pi">:</span> <span class="s2">"</span><span class="s">elasticsearch_security_key__char"</span>
+<span class="na">xpack.security.sessionTimeout</span><span class="pi">:</span> <span class="m">600000</span>
+<span class="na">monitoring.ui.container.elasticsearch.enabled</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div></div>
+
+<h3 id="1-5-logstash-pipeline-수정">1-5. logstash pipeline 수정</h3>
+
+<p>logstash에서 사용중인 conf 파일들에 elasticsearch를 사용하는 부분이 있다면  user와 password를 넣어주어야한다.</p>
+
+<p>나같은 경우, output 부분에서 사용하였는데,  아래와 같은 식으로 설정을 해 주었다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>output {
+  elasticsearch {
+    hosts =&gt; ["http://elasticsearch:9200"]
+    index =&gt; "my_index"
+    document_id =&gt; "%{id}"
+    doc_as_upsert =&gt; true
+    user =&gt; "elastic"
+    password =&gt; "password"
+ }
+}
+</code></pre></div></div>
+
+<p>위 파일들의 설정이 끝나면 docker-compose를 재시작 시킨다.</p>
+
+<h2 id="2-security-설정-확인">2. Security 설정 확인</h2>
+
+<p>security 설정이 완료된 후 9200 포트나, kibana로 접속하게 되면 username과 password를 입력하는 화면이 나온다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>username : elastic
+password : 설정값
+</code></pre></div></div>
+
+<p>위에서 설정했던 값으로 입력해서 접속하여 원하는 상태가 나오는지 확인한다.</p>
+
+<p>user가 elastic이라면 최고권한이기 때문에 아무런 장애없이 출력되어야 정상이다.</p>
+
+<h2 id="3-api-key-발급">3. API key 발급</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Kibana 접속 -&gt; 메뉴 -&gt; Management -&gt; Stack Management -&gt; Security -&gt; API keys
+
+1. 오른쪽 상단에 Create API Key 클릭 후 User 확인
+2. 원하는 name 입력
+3. 권한, 만료시간, metadata 포함여부 체크
+4. 생성
+5. 생성된 후 화면에 보이는 api key 복사 (base64형식과 json 형식 모두 저장하는 것을 추천)
+</code></pre></div></div>
+
+<p>elasitcsearch에서 제공하는 기본 key 형식은 아래와 같다.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"id"</span><span class="p">:</span><span class="s2">"idididididididi"</span><span class="p">,</span><span class="nl">"name"</span><span class="p">:</span><span class="s2">"key-name"</span><span class="p">,</span><span class="nl">"api_key"</span><span class="p">:</span><span class="s2">"keykeykeykeykey"</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>이를 이용해 key를 사용하려면 base64로 변환하여야 하는데, id와 api_key사이에 <code class="language-plaintext highlighter-rouge">:</code>를 넣고 base64로 인코딩시키면 된다.</p>
+
+<p>키바나를 이용해서 발급받은 경우 화면에 두 형식 다 출력되기 때문에 이런 과정이 필요하지 않지만, elascticsearch에 직접 요청을 하는 경우 응답이 위와같은 json으로 나와 인코딩을 시켜 key를 사용하여야 한다.</p>
+
+<h2 id="4-api-key-사용">4. API Key 사용</h2>
+
+<p>elasticserch 에 쿼리를 요청할 때, 헤더에 아래와 같이 포함시켜준다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Authorization: ApiKey {인코딩된 key}</code></p>
+
+<p>spring에서 Elasticsearch RestClient를 설정할 경우도 마찬가지로 헤더에 포함시켜 준다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">ApiKey  </code> 를 쓰고 한칸 띄워주는 것을 잊지 말자..</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Header</span><span class="o">[]</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Header</span><span class="o">[]{</span><span class="k">new</span> <span class="nc">BasicHeader</span><span class="o">(</span><span class="s">"Authorization"</span><span class="o">,</span> <span class="s">"ApiKey "</span> <span class="o">+</span> <span class="n">apiKey</span><span class="o">)};</span>
+<span class="nc">RestClientBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">RestClient</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">httpHost</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">setHttpClientConfigCallback</span><span class="o">(</span>
+      <span class="n">httpClientBuilder</span> <span class="o">-&gt;</span> <span class="n">httpClientBuilder</span>
+        <span class="o">.</span><span class="na">setDefaultHeaders</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">headers</span><span class="o">))</span>
+        <span class="o">)</span>
+
+    <span class="o">);</span>
+
+</code></pre></div></div>
+
+<h2 id="5-기타-설정사항">5. 기타 설정사항</h2>
+
+<h3 id="1-api-key를-사용하지-않고-username과-password만-사용할-경우">1. api key를 사용하지 않고 username과 password만 사용할 경우</h3>
+
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/_basic_authentication.html">참고</a></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">BasicCredentialsProvider</span> <span class="n">provider</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BasicCredentialsProvider</span><span class="o">();</span>
+    <span class="n">provider</span><span class="o">.</span><span class="na">setCredentials</span><span class="o">(</span><span class="nc">AuthScope</span><span class="o">.</span><span class="na">ANY</span><span class="o">,</span> <span class="k">new</span> <span class="nc">UsernamePasswordCredentials</span><span class="o">(</span><span class="s">"elastic"</span><span class="o">,</span><span class="s">"password"</span><span class="o">));</span>
+
+<span class="nc">RestClientBuilder</span> <span class="n">builder</span> <span class="o">=</span> <span class="nc">RestClient</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">httpHost</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">setHttpClientConfigCallback</span><span class="o">(</span>
+      <span class="n">httpClientBuilder</span> <span class="o">-&gt;</span> <span class="n">httpClientBuilder</span>
+        <span class="o">.</span><span class="na">setDefaultCredentialsProvider</span><span class="o">(</span><span class="n">provider</span><span class="o">)</span>
+      <span class="o">);</span>
+</code></pre></div></div>
+
+<p>provider를 설정해서 restClient 설정을 수정한다.</p>
+
+<h3 id="2-user를-변경하고-싶은-경우">2. user를 변경하고 싶은 경우</h3>
+
+<ol>
+  <li>kibana에 superuser 권한으로 접속</li>
+  <li>Kibana 접속 -&gt; 메뉴 -&gt; Management -&gt; Stack Management -&gt; Security -&gt; Roles</li>
+  <li>Create Role
+    <ol>
+      <li><code class="language-plaintext highlighter-rouge">role name</code>에 원하는 name 입력 (api key 생성을 위한 role이라 manage_api_key 등 추천)</li>
+      <li><code class="language-plaintext highlighter-rouge">Elasticsearch -&gt; Cluster privileges</code> 에 <code class="language-plaintext highlighter-rouge">manage_api_key</code>, <code class="language-plaintext highlighter-rouge">manage_security</code> 추가</li>
+      <li><code class="language-plaintext highlighter-rouge">indices</code>에 <code class="language-plaintext highlighter-rouge">metrics-*</code> 추가</li>
+      <li><code class="language-plaintext highlighter-rouge">privileges</code>에 <code class="language-plaintext highlighter-rouge">manage</code>추가</li>
+    </ol>
+  </li>
+  <li>유저 생성
+    <ol>
+      <li>username과 password 입력</li>
+      <li>Roles에 원하는 role 추가
+        <ul>
+          <li>health 체크를 위한 <code class="language-plaintext highlighter-rouge">apm_system</code></li>
+          <li>query 요청 및 응답을 위한 <code class="language-plaintext highlighter-rouge">editor</code></li>
+          <li>api key 생성을 위한 <code class="language-plaintext highlighter-rouge">manage_api_key</code> (위에서 만든 role)</li>
+        </ul>
+      </li>
+      <li>create</li>
+    </ol>
+  </li>
+  <li>로그아웃 후 생성한 user로 접속 -&gt; api key 생성</li>
+</ol>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="Docker" /><category term="elasticsearch" /><category term="logstash" /><category term="kibana" /><summary type="html"><![CDATA[유용한 참고자료]]></summary></entry><entry><title type="html">ELK query 사용 정리</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html" rel="alternate" type="text/html" title="ELK query 사용 정리" /><published>2021-10-08T00:00:00+09:00</published><updated>2021-10-08T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html"><![CDATA[<h2 id="설정">설정</h2>
+
+<ul>
+  <li>
+    <p>java heap memory 늘리기</p>
+
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$vi docker-elk/docker-compose.yml
+</code></pre></div>    </div>
+
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>service:
+	elasticsearch:
+		...
+		environment:
+			EX_JAVA_OPTS: "-Xmx8G -Xms4G"
+</code></pre></div>    </div>
+
+    <p>최대 8G/최소4G로 수정</p>
+  </li>
+  <li>
+    <p>elasticsearch 기본 최대 조회 개수 1만개  -&gt; 현재 10만개로 변경</p>
+
+    <p><a href="https://wedul.site/518">참고</a></p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT</span><span class="w"> </span><span class="err">your_index_name/_settings</span><span class="w">
+</span><span class="p">{</span><span class="w"> 
+  </span><span class="nl">"max_result_window"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">500000</span><span class="w"> 
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>kibana에서 실행시 timeout이 걸려 postman에서 실행하는게 좋음 (설정에서 timeout을 변경할 수 있지만 어느정도 걸리는지 확인이 되지 않아.. )</p>
+  </li>
+  <li>
+    <p>기본 주소 <code class="language-plaintext highlighter-rouge">localhost:9200/index_name/_search</code></p>
+
+    <p>body - row에 원하는 쿼리 생성해서 send</p>
+  </li>
+</ul>
+
+<h2 id="search-방법-정리">search 방법 정리</h2>
+
+<ul>
+  <li>
+    <p>간단한 키워드를 검색하는 쿼리는 GET 방식으로도 충분히 동작하지만, 조건이 많이 들어가는 쿼리는 POST를 이용하여 쿼리를 생성해 보내야함</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">GET index_name/_search</code> 를 사용해서 응답을 받으면 total.value 값이 최대 1만개까지 밖에 표시가 안됨</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w"> </span><span class="nl">"hits"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"relation"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"gte"</span><span class="w"> </span><span class="err">//</span><span class="mi">1</span><span class="err">만보다_크거나_같음을_의미</span><span class="w"> 
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">GET index_name/_search?scroll=1m</code> 을 통해 검색할시 total.value의 정확한 값이 검색됨 이를 활용하여 paging에 활용하면 좋을것 같음.</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"hits"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">17862948</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"relation"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"eq"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>elasticsearch의 paging은 from/size로 실행 -&gt; 조건이 위에서 설정한 max_result_window보다 넘을 경우 에러 발생</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="err">//size_</span><span class="mi">0</span><span class="err">도_지정_가능_-&gt;_통계응답만_필요한_쿼리에서는_본래_응답_쿼리가_필요_없으므로_size_</span><span class="mi">0</span><span class="err">_지정_가능</span><span class="w">
+    </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+    </span><span class="err">//...</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name/_search</span><span class="w">
+</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">from_조건에_</span><span class="mi">10</span><span class="err">만이_들어가서_</span><span class="mi">100010</span><span class="err">조건을_검색할_수_없어_에러_발생</span><span class="w">
+    </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">100000</span><span class="w">
+</span><span class="p">}</span><span class="w">
+  
+</span></code></pre></div>    </div>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name/_search?scroll=</span><span class="mi">1</span><span class="err">m</span><span class="w">
+</span><span class="p">{</span><span class="w">
+	</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">scroll_조건이_붙으면_from조건_넣으면_안됨</span><span class="p">,</span><span class="err">__size도_</span><span class="mi">0</span><span class="err">을_넣으면_에러발생</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>통계쿼리의 경우 aggs 조건에서 paging 처리 -&gt; 이 경우 전체 결과값이 필요 없으니 전체 size는 0으로 생성 / default size = 10</p>
+
+    <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"first"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+				</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"id"</span><span class="w">
+				</span><span class="p">,</span><span class="w"> </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span><span class="w">
+			</span><span class="p">},</span><span class="w">
+			</span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			  	</span><span class="nl">"paging"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">//first_내부_aggs를_생성하여_paging_이름_생성_후_bucket_sort_조건_생성</span><span class="w">
+					</span><span class="nl">"bucket_sort"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+						</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+						</span><span class="p">}</span><span class="w">
+				</span><span class="p">},</span><span class="w">
+				</span><span class="nl">"second"</span><span class="p">:{</span><span class="w">
+					</span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+						</span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name"</span><span class="p">,</span><span class="w">
+						</span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+					</span><span class="p">}</span><span class="w">
+				</span><span class="p">}</span><span class="w">
+			</span><span class="p">}</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+  		
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div>    </div>
+
+    <p><strong>size의 크기에 따라 쿼리 속도 차이가 심함…</strong></p>
+  </li>
+</ul>
+
+<h3 id="1-같은-필드를-조건으로-넣기">1. 같은 필드를 조건으로 넣기</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+
+      </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"should"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aaa"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bbb"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ccc"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="2-필터-조건-넣기">2. 필터 조건 넣기</h3>
+
+<p>query에 있는 조건을 검색 후 필터를 통해 다시 걸러내는 것 같음..</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+
+      </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"should"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aaa"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bbb"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ccc"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}],</span><span class="w">
+      </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mi">18</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">20</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"school.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"highSchool"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="3-통계">3. 통계</h3>
+
+<p>agg를 통해 통계 가능</p>
+
+<p>agg 안에 agg를 계속 넣어서 계속 값을 구할 수있다.</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+  </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+
+      </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"should"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aaa"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"bbb"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+                </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"name.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ccc"</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}]</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}],</span><span class="w">
+      </span><span class="nl">"filter"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+            </span><span class="mi">18</span><span class="p">,</span><span class="mi">80</span><span class="p">,</span><span class="mi">20</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"term"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"school.keyword"</span><span class="p">:</span><span class="w"> </span><span class="s2">"highSchool"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"school"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"school.keyword"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"age.keyword"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name_count"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"cardinality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name.keyword"</span><span class="w">
+              </span><span class="p">}</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="4-응답">4. 응답</h3>
+
+<p>2번의 variant 필터를 넣은 쿼리를 실행할 경우의 응답</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"took"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timed_out"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"_shards"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"successful"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"skipped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"failed"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eq"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"max_score"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"aggregations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"school"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"doc_count_error_upper_bound"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"sum_other_doc_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"highScool"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"doc_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"doc_count_error_upper_bound"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"sum_other_doc_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"buckets"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+            </span><span class="nl">"key"</span><span class="p">:</span><span class="w"> </span><span class="mi">18</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"doc_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name_count"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">185</span><span class="w"> 
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">}]</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">}]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="5-agg-페이징">5. agg 페이징</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST</span><span class="w"> </span><span class="err">index_name</span><span class="w"> </span><span class="err">/</span><span class="w"> </span><span class="err">_search</span><span class="w"> 
+</span><span class="p">{</span><span class="w">
+    </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+
+    </span><span class="nl">"query"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"must"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+              </span><span class="nl">"bool"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"should"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+                  </span><span class="err">//구하고싶은_모든_조건</span><span class="w"> 
+                </span><span class="p">]</span><span class="w">
+              </span><span class="p">}</span><span class="w">
+            </span><span class="p">,</span><span class="w">
+            </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+              </span><span class="nl">"school"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"school.keyword"</span><span class="p">,</span><span class="w">
+                  </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">20000</span><span class="w">
+                </span><span class="p">},</span><span class="w">
+                </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                  </span><span class="nl">"paging"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"bucket_sort"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                      </span><span class="nl">"from"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+                      </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                  </span><span class="p">},</span><span class="w">
+                  </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                    </span><span class="nl">"terms"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                      </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"age"</span><span class="p">,</span><span class="w">
+                      </span><span class="nl">"size"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="w">
+                    </span><span class="p">},</span><span class="w">
+                    </span><span class="nl">"aggs"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                      </span><span class="nl">"name_count"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                        </span><span class="nl">"cardinality"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                          </span><span class="nl">"field"</span><span class="p">:</span><span class="w"> </span><span class="s2">"name.keyword"</span><span class="w">
+                        </span><span class="p">}</span><span class="w">
+                      </span><span class="p">}</span><span class="w">
+                    </span><span class="p">}</span><span class="w">
+                  </span><span class="p">}</span><span class="w">
+                </span><span class="p">}</span><span class="w">
+              </span><span class="p">}</span><span class="w">
+
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></code></pre></div></div>
+
+<p>데이터가 너무 많을경우 buckets_size와 관련해서 에러가 발생할 수있다. <code class="language-plaintext highlighter-rouge">too_many_buckets_exception</code> 과 같은..</p>
+
+<p><a href="https://shinwusub.tistory.com/m/129">이 블로그</a>를 참고하여 해결하였다..</p>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="elasticsearch" /><summary type="html"><![CDATA[설정]]></summary></entry><entry><title type="html">DOCKER에서 ELK 설치 및 사용하기</title><link href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html" rel="alternate" type="text/html" title="DOCKER에서 ELK 설치 및 사용하기" /><published>2021-09-27T00:00:00+09:00</published><updated>2021-09-27T00:00:00+09:00</updated><id>http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0</id><content type="html" xml:base="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html"><![CDATA[<h2 id="유용한-참고자료들">유용한 참고자료들</h2>
+
+<p><a href="https://esbook.kimjmin.net/">Elastic 가이드북(한글)</a></p>
+
+<p><a href="https://docs.docker.com/engine/install/centos/">centos에 docker 설치(docker-docs)</a></p>
+
+<p><a href="https://docs.docker.com/compose/install/#install-compose-on-linux-systems">linux에 docker-compse 설치</a></p>
+
+<p><a href="https://nirsa.tistory.com/81">docker-conpose 명령어 정리</a></p>
+
+<p><a href="https://github.com/deviantony/docker-elk">dokcer-elk git</a></p>
+
+<p><a href="https://kkamagistory.tistory.com/771">elk config 수정 정리</a></p>
+
+<p><a href="https://ohoroyoi.tistory.com/233">logstash - jdbc 연결 참고 자료</a></p>
+
+<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html">logstash - jdbc docs</a></p>
+
+<h2 id="1-docker-설치">1. Docker 설치</h2>
+
+<p><a href="https://docs.docker.com/engine/install/centos/">docs</a>를 참고하여 설치</p>
+
+<p>docker를 이미 설치했고 사용하고 있는 상태라면 삭제 X</p>
+
+<h2 id="2-docker-compose-설치">2. docker-compose 설치</h2>
+
+<p>docker-compose <a href="https://docs.docker.com/compose/install/#install-compose-on-linux-systems">docs</a>를 참고하여 설치</p>
+
+<h2 id="3-docker-elk-설치">3. docker-elk 설치</h2>
+
+<p>docker-elk 설치를 원하는 위치로 이동 후 아래 명령어 실행</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git clone https://github.com/deviantony/docker-elk.git
+$ cd docker-elk
+</code></pre></div></div>
+
+<p><a href="https://judo0179.tistory.com/60">블로그</a>를 참고하여 elasticsearch, logstach, kibana config 수정(xpack 부분 주석 처리)</p>
+
+<h2 id="4-jdbc-연결-설정">4. JDBC 연결 설정</h2>
+
+<p>DB 데이터를 elasticsearch에 저장하는 경우 사용</p>
+
+<h3 id="4-1-원하는-jdbc-driver파일-다운로드">4-1. 원하는 JDBC driver파일 다운로드</h3>
+
+<p>postgres의 경우<a href="https://jdbc.postgresql.org/">해당 페이지</a>로 이동하여 원하는 버전을 다운로드한다.</p>
+
+<p>다운로드 받은 후 원하는 위치에 저장 (ex /lib/…. )</p>
+
+<h3 id="4-2-logstash-dockerfile-수정">4-2. Logstash Dockerfile 수정</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cd /../docker-elk/logstash
+$ vi Dockerfile
+</code></pre></div></div>
+
+<p>아래 명령어 추가 <a href="https://github.com/dimMaryanto93/docker-logstash-input-jdbc/blob/master/Dockerfile">참고</a></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>COPY /{jdbc dirve 저장경로}/{jdbc 파일 이름}.jar /usr/share/logstash/logstash-core/lib/jars/postgresql.jar
+</code></pre></div></div>
+
+<p>-&gt; docker를 사용할 경우 이렇게 지정해 줘야함.</p>
+
+<h3 id="4-3-logstash-pipline-conf-수정">4-3. Logstash pipline conf 수정</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input {
+  jdbc {
+     jdbc_connection_string =&gt; "jdbc:postgresql://{IP}:{PORT}/{DATABASE}"
+     jdbc_user =&gt; "{userName}"
+     jdbc_password =&gt; "{password}"
+     jdbc_driver_class =&gt; "org.postgresql.Driver"
+     jdbc_driver_library =&gt; "/usr/share/logstash/logstash-core/lib/jars/postgresql.jar"
+     statement =&gt; "select * from table"
+     jdbc_paging_enabled =&gt; true
+     jdbc_page_size =&gt; 10000
+     jdbc_pool_timeout =&gt; 300
+     schedule =&gt; "*/1 * * * *"
+
+ }
+}
+
+# filter{}
+
+output {
+  elasticsearch {
+    hosts =&gt; "elasticsearch:9200"
+    index =&gt; "index_name"
+    document_id =&gt; "%{id}"
+    doc_as_upsert =&gt; true
+ }
+}
+
+</code></pre></div></div>
+
+<h4 id="input">input</h4>
+
+<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html#plugins-inputs-jdbc-options">참고</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>options</th>
+      <th>input example</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>jdbc_connection_string</td>
+      <td>jdbc:postgresql://localhost:5432/db</td>
+      <td>database 연결 정보를 입력하는 부분.<br />연결할 DB 정보에 맞게 입력</td>
+    </tr>
+    <tr>
+      <td>jdbc_user</td>
+      <td>user</td>
+      <td>database user 입력</td>
+    </tr>
+    <tr>
+      <td>jdbc_password</td>
+      <td>password</td>
+      <td>database password 입력</td>
+    </tr>
+    <tr>
+      <td>jdbc_driver_class</td>
+      <td>org.postgresql.Driver</td>
+      <td>driver class 입력</td>
+    </tr>
+    <tr>
+      <td>jdbc_driver_library</td>
+      <td>/usr/share/logstash/logstash-core/lib/jars/postgresql.jar</td>
+      <td>4-2 에서 copy한 jar 경로 입력 <br />사용 할 driver jar 의 경로가 입력되야함.</td>
+    </tr>
+    <tr>
+      <td>statement</td>
+      <td>select * from table</td>
+      <td>저장할 data  query 입력</td>
+    </tr>
+    <tr>
+      <td>jdbc_paging_enabled</td>
+      <td>true</td>
+      <td>페이징을 사용하여 데이터를 저장할 경우 사용</td>
+    </tr>
+    <tr>
+      <td>jdbc_page_size</td>
+      <td>10000</td>
+      <td>페이지 사이즈 지정</td>
+    </tr>
+    <tr>
+      <td>jdbc_pool_timeout</td>
+      <td>300</td>
+      <td>jdbc timeout 지정</td>
+    </tr>
+    <tr>
+      <td>schedule</td>
+      <td>*/1 * * * *</td>
+      <td>스케쥴 지정 linux cron형식으로 스케쥴 지정</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>다른 추가적 옵션들은 참고 확인</p>
+
+<h4 id="output">output</h4>
+
+<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html">참고</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>options</th>
+      <th>output example</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>hosts</td>
+      <td>elasticsearch:9200</td>
+      <td>output 을 elasticsearch로 지정하여 hosts를 elasticsearch:9200로 지정<br />만약 다른 output일 경우 다르게 지정해주면 된다.</td>
+    </tr>
+    <tr>
+      <td>index</td>
+      <td>index_name</td>
+      <td>원하는 index name 지정</td>
+    </tr>
+    <tr>
+      <td>document_id</td>
+      <td>%{id}</td>
+      <td>document id 지정. <br />input의 statement 쿼리에서 나온 컬럼의 이름을 사용한다.</td>
+    </tr>
+    <tr>
+      <td>doc_as_upsert</td>
+      <td>true</td>
+      <td>elasticsearch에 존재하지 않을 경우 새로 생성</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="5-docker-compose-실행">5. docker-compose 실행</h2>
+
+<p>설치한 docker-elk 디렉토리로 이동하여 실행시켜야 한다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cd /../docker-elk
+</code></pre></div></div>
+
+<ul>
+  <li>실행 : docker-compose build &amp;&amp; docker-compose up -d</li>
+  <li>이미지까지 삭제 후 down : docker-compose down –rmi all</li>
+  <li>실행 후 로그 확인 : docker-compose logs -f</li>
+</ul>
+
+<h2 id="6-기타">6. 기타</h2>
+
+<h3 id="6-1-elasticsearch">6-1. Elasticsearch</h3>
+
+<ul>
+  <li>
+    <p>기본 접속 정보 : {IP}:9200</p>
+  </li>
+  <li>
+    <p>index 정보 : {IP}:9200/index_name</p>
+
+    <ul>
+      <li>index가 가지고 있는 컬럼의 정보를 확인할 수 있다.</li>
+    </ul>
+  </li>
+  <li>
+    <p>data 확인 : {IP}:9200/index_name/_search</p>
+
+    <ul>
+      <li>
+        <p>따로 쿼리를 주지 않으면 전체 데이터 검색</p>
+      </li>
+      <li>
+        <p>검색시 걸린 시간과 데이터.. 등등.. 확인 가능</p>
+
+        <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+	</span><span class="nl">"took"</span><span class="p">:</span><span class="w"> </span><span class="mi">1425</span><span class="p">,</span><span class="w"> </span><span class="err">//</span><span class="mi">1425</span><span class="err">ms_걸렸다.</span><span class="w"> 
+	</span><span class="nl">"timed_out"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"_shards"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+		</span><span class="nl">"successful"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+		</span><span class="nl">"skipped"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+		</span><span class="nl">"failed"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w">
+	</span><span class="p">},</span><span class="w">
+	</span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+		</span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="err">//elasticsearch는_최대_만개_출력.._더_출력하고_싶으면_다른_기능_적용하여_사용..</span><span class="w"> 
+			</span><span class="nl">"relation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"gte"</span><span class="w"> </span><span class="err">//데이터가_value보다_많거나(gt)_같음(e)을_의미</span><span class="w"> 
+        </span><span class="p">},</span><span class="w">
+		</span><span class="nl">"max_score"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+		</span><span class="nl">"hits"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+					</span><span class="nl">"_index"</span><span class="p">:</span><span class="w"> </span><span class="s2">"index_name"</span><span class="p">,</span><span class="w"> </span><span class="err">//설정한_index_name</span><span class="w">
+					</span><span class="nl">"_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"_doc"</span><span class="p">,</span><span class="w">
+					</span><span class="nl">"_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"32856265"</span><span class="p">,</span><span class="w"> </span><span class="err">//설정한_id_값</span><span class="w">
+					</span><span class="nl">"_score"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+					</span><span class="nl">"_source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                        			</span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">32856265</span><span class="p">,</span><span class="w">
+                        			</span><span class="nl">"value_1"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value"</span><span class="p">,</span><span class="w">
+                        			</span><span class="nl">"value_2"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w">
+                        </span><span class="err">//.</span><span class="w">
+                        </span><span class="err">//.</span><span class="w">
+                        </span><span class="err">//.</span><span class="w">                    	
+</span></code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+  <li>
+    <p>value 검색 :  {IP}:9200/index_name/_search<strong>?q={property}:{search}</strong></p>
+
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">?</code> 뒤에 q로 검색한다.</li>
+      <li>property를 지정하면 해당 property에서 검색 <code class="language-plaintext highlighter-rouge">ex) ...?q=value_1:value</code></li>
+      <li>property를 지정하지 않으면 전체 propery에 해당되는 내용 검색 <code class="language-plaintext highlighter-rouge">ex) ...?q=value</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="6-2-kibana">6-2. Kibana</h3>
+
+<ul>
+  <li>기본 접속정보 : {IP}:5601</li>
+  <li>7.15.0 버전 기준 inex 확인하기
+    <ol>
+      <li>왼쪽 상단 메뉴 버튼 클릭</li>
+      <li>맨 하단 Management -&gt; Stack Management</li>
+      <li>Data -&gt; Index Management</li>
+      <li>생성한 index 확인</li>
+    </ol>
+  </li>
+</ul>]]></content><author><name>doohee94</name></author><category term="개발" /><category term="ELK" /><category term="Docker" /><category term="elasticsearch" /><category term="logstash" /><category term="kibana" /><summary type="html"><![CDATA[유용한 참고자료들]]></summary></entry></feed>

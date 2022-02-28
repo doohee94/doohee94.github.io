@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Spring에서 외부 API 호출하기 1 (RestTemplate) | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Spring에서 외부 API 호출하기 1 (RestTemplate)">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="프로젝트에서 외부 api를 이용하여 로직을 짜는 부분을 맡게 되었다.">
+<meta property="og:description" content="프로젝트에서 외부 api를 이용하여 로직을 짜는 부분을 맡게 되었다.">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-08-05T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Spring에서 외부 API 호출하기 1 (RestTemplate)">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2021-08-05T00:00:00+09:00","datePublished":"2021-08-05T00:00:00+09:00","description":"프로젝트에서 외부 api를 이용하여 로직을 짜는 부분을 맡게 되었다.","headline":"Spring에서 외부 API 호출하기 1 (RestTemplate)","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Spring에서 외부 API 호출하기 1 (RestTemplate)</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-08-05T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Aug 05, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#%EC%99%B8%EB%B6%80%20API%20%ED%98%B8%EC%B6%9C">#외부 API 호출</a><a class="post-tag" href="/tags.html#RestTemplate">#RestTemplate</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>프로젝트에서 외부 api를 이용하여 로직을 짜는 부분을 맡게 되었다.</p>
+
+<p>Spring에서 외부 api를 호출하기 위해서는 RestTemplate이나 Webclient를 사용한다고 하여 관련 자료를 찾아보고 적용해 보았다.</p>
+
+<p>사실 처음에는 webClient만을 사용하다가, 안되는 기능이 있어 restTemplate도 같이 사용하게 되었다…</p>
+
+<p>프로젝트를 진행하면서 새롭게 알게 된 사실이나 정리할 부분이 많아 이를 한번 정리해 보았다.</p>
+
+<h2 id="resttemplate">RestTemplate</h2>
+
+<p>restTemplate은 Spring 3부터 지원된 api로, api를 호출한 후 응답을 받을 때 까지 기다리는 <strong>동기 방식</strong>이다.</p>
+
+<p>spring5 버전부터는 restTemplate보다 webClient를 사용하라고 권고 하고 있다.</p>
+
+<blockquote>
+  <p><strong>NOTE:</strong> As of 5.0 this class is in maintenance mode, with only minor requests for changes and bugs to be accepted going forward. Please, consider using the <code class="language-plaintext highlighter-rouge">org.springframework.web.reactive.client.WebClient</code> which has a more modern API and supports sync, async, and streaming scenarios.</p>
+
+  <p>참고 :  5.0 현재 이 클래스는 유지관리 모드에 있으며, 앞으로는 변경 및 버그에 대한 사소한 요청만 수락 될 예정입니다.  동기, 비동기 스트리밍 시나리오를 지원한 최신 API WebClient를 사용할 것을 고려하십시오</p>
+</blockquote>
+
+<h3 id="사용-방법">사용 방법</h3>
+
+<h4 id="1-gradle">1. gradle</h4>
+
+<p>spring boot를 사용한다면 따로  설정해주지 않아도 된다. 만약, boot가 아니라면 <code class="language-plaintext highlighter-rouge">spring-webmvc</code> 를 의존성에 추가해야 한다.</p>
+
+<h4 id="2-config">2. config</h4>
+
+<p>RestTemplate를 사용할 때마다 객체를 생성해서 사용할 수 도 있지만, bean으로 등록하여 사용하는 방법을 택하였다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="nd">@Slf4j</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RestTemplateConfig</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">VCFConfiguration</span> <span class="n">vcfConfiguration</span><span class="o">;</span>
+
+  <span class="nd">@Bean</span>
+  <span class="kd">public</span> <span class="nc">RestTemplate</span> <span class="nf">restTemplate</span><span class="o">(</span><span class="nc">RestTemplateBuilder</span> <span class="n">restTemplateBuilder</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">restTemplateBuilder</span>
+      <span class="o">.</span><span class="na">requestFactory</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="k">new</span> <span class="nc">BufferingClientHttpRequestFactory</span><span class="o">(</span><span class="k">new</span> <span class="nc">SimpleClientHttpRequestFactory</span><span class="o">()))</span>
+      <span class="o">.</span><span class="na">setConnectTimeout</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">5000</span><span class="o">))</span> <span class="c1">// connection-timeout</span>
+      <span class="o">.</span><span class="na">setReadTimeout</span><span class="o">(</span><span class="nc">Duration</span><span class="o">.</span><span class="na">ofMillis</span><span class="o">(</span><span class="mi">5000</span><span class="o">))</span> <span class="c1">// read-timeout</span>
+      <span class="o">.</span><span class="na">additionalMessageConverters</span><span class="o">(</span><span class="k">new</span> <span class="nc">StringHttpMessageConverter</span><span class="o">(</span><span class="nc">Charset</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">)))</span>
+      <span class="o">.</span><span class="na">rootUri</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="s">"http://address:port/api"</span><span class="o">))</span>
+      <span class="o">.</span><span class="na">errorHandler</span><span class="o">(</span><span class="k">new</span> <span class="nc">RestTemplateResponseErrorHandler</span><span class="o">())</span>
+      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>rootUri부분에 호출 할 api의 주소를 넣어주면 된다. api 주소의 공통 부분까지 적어주면 편하다.</p>
+
+<p>에러가 발생할 경우, 에러 응답이 body로 넘어오게 되는데,  어떤 에러를 받을 것 인지, 받고 난 후 어떻게 처리할 것 인지를 따로 정의할 수 있다.</p>
+
+<p>이를 errorHandler에 넣어준다.  (참고에 있는 블로그 참고)</p>
+
+<p>내가 진행하고 있는 프로젝트에서는 에러 응답이 정해져 있어, 정해진 에러 코드만을 받아서 처리했다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">RestTemplateResponseErrorHandler</span> <span class="kd">implements</span> <span class="nc">ResponseErrorHandler</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">hasError</span><span class="o">(</span><span class="nc">ClientHttpResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="na">getStatusCode</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">BAD_REQUEST</span>
+      <span class="o">||</span> <span class="n">response</span><span class="o">.</span><span class="na">getStatusCode</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleError</span><span class="o">(</span><span class="nc">ClientHttpResponse</span> <span class="n">response</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+    
+  <span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="3-api-호출">3. api 호출</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Service</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Service</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">RestTemplate</span> <span class="n">restTemplate</span><span class="o">;</span>
+    
+    <span class="kd">public</span> <span class="nc">SampleDto</span> <span class="nf">useResTemplate</span><span class="o">(){</span>
+        
+        <span class="nc">HttpHeaders</span> <span class="n">headers</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpHeaders</span><span class="o">();</span>
+
+    <span class="nc">MultiValueMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">LinkedMultiValueMap</span><span class="o">&lt;&gt;();</span>
+    <span class="n">map</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"data1"</span><span class="o">,</span> <span class="s">"test"</span><span class="o">);</span>
+    <span class="n">map</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"file"</span><span class="o">,</span> <span class="n">file</span><span class="o">);</span>
+
+    <span class="nc">HttpEntity</span><span class="o">&lt;</span><span class="nc">MultiValueMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;&gt;</span> <span class="n">request</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HttpEntity</span><span class="o">&lt;&gt;(</span><span class="n">map</span><span class="o">,</span> <span class="n">headers</span><span class="o">);</span>
+        
+        <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">exchange</span><span class="o">(</span>
+          <span class="s">"/sample"</span><span class="o">,</span>
+            <span class="nc">HttpMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span>
+            <span class="n">request</span><span class="o">,</span>
+            <span class="nc">SampleDto</span><span class="o">.</span><span class="na">class</span>
+        <span class="o">);</span>
+        
+        <span class="nc">SampleDto</span> <span class="n">sampleDto</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="na">getBody</span><span class="o">();</span>
+        
+        <span class="k">return</span> <span class="n">sampleDto</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<p>위의 코드는 POST요청을 위한 코드로 GET도 비슷하게 진행된다.</p>
+
+<p><em>(GET과의 차이점은 get에는 request를 넣지 않는다. http 규격상 get요청에는 request body를 넣지 않기 때문..)</em></p>
+
+<p><code class="language-plaintext highlighter-rouge">MultiValueMap&lt;String, Object&gt;</code> 을 이용하면 , formData를 넣는 것처럼 다양한 객체를 request body에 담을 수 있다. 이를 <code class="language-plaintext highlighter-rouge">HttpEntity&lt;MultiValueMap&lt;String, Object&gt;&gt;</code>에 담은 후, request로 보내면 된다.</p>
+
+<p>요청의 마지막<code class="language-plaintext highlighter-rouge">SampleDto.class</code> 를 이용해 response body의 형식을 정할 수 있다.</p>
+
+<p>responseBody로 가져오는 형식과 내가 만든 객체의 property가 다르다면 <code class="language-plaintext highlighter-rouge">@Jsonproperty</code>를 이용해 매핑 시킬 수 있다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Data</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleDto</span><span class="o">{</span>
+    
+  <span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">"test_value"</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">testValue</span><span class="o">;</span>
+  <span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">"readValue"</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">readValue</span><span class="o">;</span>
+  <span class="nd">@JsonProperty</span><span class="o">(</span><span class="s">"number"</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="nc">Integer</span> <span class="n">strNumber</span><span class="o">;</span>
+   
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>이후 `  SampleDto sampleDto = response.getBody()` 과 같이 객체로 변환 시킬 수 있다.</p>
+
+<p>이때, 주의점은 매핑시킨 객체에 <code class="language-plaintext highlighter-rouge">setter</code>와  <code class="language-plaintext highlighter-rouge">기본생성자</code>가 있어야 한다는 것이다. 보통 response body는 json 형식으로 넘어오게 되는데, 이를 객체로 매핑 시킬 때 setter와 기본 생성자를 사용하여 매핑을 시켜주기 때문이다.</p>
+
+<h4 id="4-에러처리">4. 에러처리</h4>
+
+<p>나 같은 경우 비즈니스 로직 상에서 에러를 잡아 처리할 일이 있어 핸들러에서 따로 에러를 처리하지 않았었다.</p>
+
+<p>RestTemplateResponseErrorHandler의 hasError 에서 에러를 잡아낸 후, 로직 상에서 다시 상태 코드를 받아 필요한 작업을 처리하였다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">.</span>
+<span class="o">.</span>
+ <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">response</span> <span class="o">=</span> <span class="n">restTemplate</span><span class="o">.</span><span class="na">exchange</span><span class="o">(</span>
+          <span class="s">"/sample"</span><span class="o">,</span>
+            <span class="nc">HttpMethod</span><span class="o">.</span><span class="na">POST</span><span class="o">,</span>
+            <span class="n">request</span><span class="o">,</span>
+            <span class="nc">SampleDto</span><span class="o">.</span><span class="na">class</span>
+        <span class="o">);</span>
+
+<span class="k">if</span> <span class="o">(</span><span class="n">response</span><span class="o">.</span><span class="na">getStatusCode</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">BAD_REQUEST</span>
+      <span class="o">||</span> <span class="n">response</span><span class="o">.</span><span class="na">getStatusCode</span><span class="o">()</span> <span class="o">==</span> <span class="nc">HttpStatus</span><span class="o">.</span><span class="na">INTERNAL_SERVER_ERROR</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="c1">//필요한 로직 처리 </span>
+    <span class="o">}</span>
+
+<span class="o">.</span>
+<span class="o">.</span>
+<span class="o">.</span>
+</code></pre></div></div>
+
+<p>이런 특수한(?) 경우가 아니라면 핸들러에서 Exception을 발생 시키는게 낫다고 생각한다..</p>
+
+<h2 id="참고">참고</h2>
+
+<p><a href="https://advenoh.tistory.com/46">RestTemplate 설명</a></p>
+
+<p><a href="https://dev-kimse9450.tistory.com/19">RestTemplate error Handler 관련</a></p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%9C%EB%B0%9C/2021/05/13/JPA-OneToOne-%EA%B4%80%EA%B3%84%EC%9D%B8%EB%8D%B0-2%EA%B0%9C%EA%B0%80-%EC%A0%80%EC%9E%A5%EB%90%A8.html" title="JPA OneToOne 관계인데 2개가 저장됨">JPA OneToOne 관계인데 2개가 저장됨</a><a class="next" href="/%EA%B0%9C%EB%B0%9C/2021/08/11/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-2-Webclient.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">Spring에서 외부 API 호출하기 2 (Webclient)...</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">ELK query 사용 정리</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">Spring 에러 발생 시, Slack 알람 만들기</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/04/HTTP-%EA%B8%B0%EB%B3%B8.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">HTTP</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html" title="Spring에서 외부 API 호출하기 2 (Webclient)">HTTP 상태코드 요약</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

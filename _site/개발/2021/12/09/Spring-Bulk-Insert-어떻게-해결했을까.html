@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Spring Batch Insert 어떻게 해결했을까 | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Spring Batch Insert 어떻게 해결했을까">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.">
+<meta property="og:description" content="대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-12-09T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Spring Batch Insert 어떻게 해결했을까">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2021-12-09T00:00:00+09:00","datePublished":"2021-12-09T00:00:00+09:00","description":"대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.","headline":"Spring Batch Insert 어떻게 해결했을까","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Spring Batch Insert 어떻게 해결했을까</h1>
+  <h2 class="post-subtitle">JdbcTemplate 곁들인..</h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-12-09T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Dec 09, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#JdbcTemplate">#JdbcTemplate</a><a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#Bulk%20Insert">#Bulk Insert</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.</p>
+
+<p>한 파일당 약 3만줄의 데이터를 파싱해서 20개의 테이블에 나눠 저장을 하였다. 파일은 모두 90개였던 것으로 기억한다. (전체 저장 데이터가 5G정도 나왔었다.)</p>
+
+<p>다 저장해보니 용량이 어마무시했던 기억이 있는데, 지금은 사용하지 않아 없어졌다.</p>
+
+<p>하지만 Spring Batch Insert를 도전했던 좋은 추억이라 (^^) 기록을 해보려 한다.</p>
+
+<h2 id="jdbctemplate-bulk-insert-활용기">JdbcTemplate Bulk Insert 활용기</h2>
+
+<h3 id="기본-사용-방법">기본 사용 방법</h3>
+
+<p>bulk insert를 위해 batchUpdate() 함수를 사용하였다. 기본 사용 방법은 아래와 같다.</p>
+
+<pre><code class="language-JAVA">@RequiredArgsConstructor
+public class SampleJdbcTemplateRepository {
+
+  private final JdbcTemplate jdbcTemplate;
+
+  public void batchInsert(List&lt;SampleDto&gt; temp) {
+
+    jdbcTemplate.batchUpdate("INSERT INTO sample_table ("
+            + "a,\n"
+            + "b )"
+            + "VALUES (?,?)",
+        new BatchPreparedStatementSetter() {
+          @Override
+          public void setValues(PreparedStatement ps, int i) throws SQLException {
+
+            ps.setObject(1, temp.get(i).getA(), Types.VARCHAR);
+            ps.setObject(2, temp.get(i).getB(), Types.VARCHAR);
+
+          }
+
+          @Override
+          public int getBatchSize() {
+            return temp.size();
+          }
+        });
+  }
+
+}
+</code></pre>
+
+<h3 id="어떻게-활용했나">어떻게 활용했나</h3>
+
+<p>이 <a href="https://homoefficio.github.io/2020/01/25/Spring-Data%EC%97%90%EC%84%9C-Batch-Insert-%EC%B5%9C%EC%A0%81%ED%99%94/">블로그</a>를 참고하여 코드를 작성하였다.</p>
+
+<p>서론에서 언급했지만 테이블이 약 20개에, 모두 연관관계로 매핑되어있었고, 데이터의 양도 많았기 때문에..</p>
+
+<blockquote>
+  <ol>
+    <li>저장할 전체 리스트를 지정한 batchSize만큼 자른다</li>
+    <li>자른 리스트를 batchInsert 시킨다.</li>
+    <li>마지막 남은 리스트도 마저 insert 시킨다.</li>
+  </ol>
+</blockquote>
+
+<p>이 로직을 그대로 이용하였다.</p>
+
+<p>이 로직 중, 저장할 전체 리스트를 자르고 batchInsert함수를 호출하는 부분은 모든 테이블에 반복 적용되니 추상 클래스를 만들어 필요한 부분에 상속시켜주었다.</p>
+
+<h4 id="samplejdbctemplatejava">SampleJdbcTemplate.java</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">SampleJdbcTemplate</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span> <span class="c1">// T에는 batchInsert를 하고싶은 도메인 </span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="no">BATCH_SIZE</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">;</span>
+
+  <span class="nd">@Transactional</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">save</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">dataList</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="kt">int</span> <span class="n">batchCount</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span><span class="c1">// insert 총 횟수 확인을 위한 변수 </span>
+
+    <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">temp</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">dataList</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+
+      <span class="n">temp</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">dataList</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+
+      <span class="k">if</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="no">BATCH_SIZE</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">batchCount</span> <span class="o">=</span> <span class="n">vepBatchInsert</span><span class="o">(</span><span class="n">batchCount</span><span class="o">,</span> <span class="n">temp</span><span class="o">);</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="k">if</span> <span class="o">(!</span><span class="n">temp</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+      <span class="n">batchCount</span> <span class="o">=</span> <span class="n">vepBatchInsert</span><span class="o">(</span><span class="n">batchCount</span><span class="o">,</span> <span class="n">temp</span><span class="o">);</span> <span class="c1">//for문을 벗어나고 남은 데이터가 존재하면 나머지 insert</span>
+    <span class="o">}</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">"batchCount : "</span> <span class="o">+</span> <span class="n">batchCount</span><span class="o">);</span> 
+
+  <span class="o">}</span>
+
+  <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">int</span> <span class="nf">batchInsert</span><span class="o">(</span><span class="kt">int</span> <span class="n">batchCount</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">temp</span><span class="o">);</span> <span class="c1">// 각 쿼리 실행을 위한 abstract 함수 </span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="sampledtojdbcjava">SampleDtoJdbc.java</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Repository</span>
+<span class="nd">@RequiredArgsConstructor</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">SampleDtoJdbc</span> <span class="kd">extends</span> <span class="nc">SampleJdbcTemplate</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">JdbcTemplate</span> <span class="n">jdbcTemplate</span><span class="o">;;</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">protected</span> <span class="kt">int</span> <span class="nf">batchInsert</span><span class="o">(</span><span class="kt">int</span> <span class="n">batchCount</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">SampleDto</span><span class="o">&gt;</span> <span class="n">temp</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="n">jdbcTemplate</span><span class="o">.</span><span class="na">batchUpdate</span><span class="o">(</span><span class="s">"INSERT INTO sample_table ("</span>
+            <span class="o">+</span> <span class="s">"a,\n"</span>
+            <span class="o">+</span> <span class="s">"b )"</span>
+            <span class="o">+</span> <span class="s">"VALUES (?,?)"</span><span class="o">,</span>
+        <span class="k">new</span> <span class="nf">BatchPreparedStatementSetter</span><span class="o">()</span> <span class="o">{</span>
+          <span class="nd">@Override</span>
+          <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setValues</span><span class="o">(</span><span class="nc">PreparedStatement</span> <span class="n">ps</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">SQLException</span> <span class="o">{</span>
+
+            <span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="n">temp</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getA</span><span class="o">(),</span> <span class="nc">Types</span><span class="o">.</span><span class="na">VARCHAR</span><span class="o">);</span>
+            <span class="n">ps</span><span class="o">.</span><span class="na">setObject</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">temp</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="na">getB</span><span class="o">(),</span> <span class="nc">Types</span><span class="o">.</span><span class="na">VARCHAR</span><span class="o">);</span>
+
+          <span class="o">}</span>
+
+          <span class="nd">@Override</span>
+          <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getBatchSize</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+          <span class="o">}</span>
+        <span class="o">});</span>
+
+    <span class="n">temp</span><span class="o">.</span><span class="na">clear</span><span class="o">();</span> <span class="c1">// temp list를 비워준다. </span>
+    <span class="n">batchCount</span><span class="o">++;</span> <span class="c1">//insert가 완료되면, 총 횟수에 1을 더해준다. </span>
+
+    <span class="k">return</span> <span class="n">batchCount</span><span class="o">;</span>
+  <span class="o">}</span>
+
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>해당 함수는 insert가 필요한 모든 테이블에 대해 생성해 주었다.</p>
+
+<h3 id="그래서-bulk-insert-batch-insert가-뭐야">그래서 Bulk Insert? Batch Insert가 뭐야?</h3>
+
+<p>말 그대로 많은 양의 데이터를 Insert하는 것이다.</p>
+
+<p>JPA의 saveAll을 이용하면 데이터 리스트의 저장가능하지만, 이런 방식으로 insert를 했다간..</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="n">test_table</span> <span class="p">(</span><span class="o">~~~</span><span class="p">)</span> <span class="k">VALUES</span> <span class="p">(</span><span class="o">~~~</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>이런 쿼리가 수백, 수천만건 반복될 것이다 -&gt; 시간이 오래걸린다.</p>
+
+<p>내가 저장했던 데이터를 JPA SaveAll을 이용하여 저장 했을 시 <u>2시간</u> 이상 걸렸던 것으로 기억한다..</p>
+
+<p>그래서 spring에서 batch-insert를 지원한다고 하여 사용해 봤었지만.. 내가 원하는 기능은 아니었다. <a href="https://jaehun2841.github.io/2020/11/22/2020-11-22-spring-data-jpa-batch-insert/#hibernateorder_inserts-hibernateorder_updates">참고</a></p>
+
+<p>내가 지정한 id의 생성 방식도 <u>strategy = GenerationType.IDENTITY</u> 이렇게 지정했었을 뿐더러</p>
+
+<p>batch-insert도 property에서 지정한 batch-size에 맞게 insert를 묶어서 보내주는 방식일 뿐 아래와 같은 형식은 아니었다.</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">INSERT</span> <span class="k">INTO</span> <span class="k">TABLE</span> <span class="p">(</span><span class="o">~~~~</span><span class="p">)</span> <span class="k">VALUES</span> 
+<span class="p">(</span><span class="o">~~~~~</span><span class="p">),</span>
+<span class="p">(</span><span class="o">~~~~~~</span><span class="p">),</span>
+<span class="p">(</span><span class="o">~~~~~~</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>batch-size를 지정하여 저장하였을 때는 약 <u>1시간</u> 정도의 시간이 소요되었다.</p>
+
+<p><strong>그럼 JdbcTamplate를 이용했을때는?</strong></p>
+
+<p>이 <a href="https://wave1994.tistory.com/160">블로그</a>를 참고해보면 Hibernate에서는 insert가 단 건으로 처리되지만, DB driver에서 해당 쿼리들을 모아 batch insert를 시켜준다고 한다.</p>
+
+<p>JdbcTamplate을 사용했을 때는 <u>20분~30분</u>의 시간이 소요되었다. <del>정말 눈에 띄게 시간이 단축되어 성공했을때 울뻔했다..</del></p>
+
+<h2 id="후기">후기</h2>
+
+<p>사실 작년에 작성했던 코드라 잘 기억도 안나고.. 기록도 거의 안남아서 힘들었다는 기억밖에 없었는데,</p>
+
+<p>글로 한번 정리하면서 관련 글도 읽고하니 새로운 사실도 알게 되어서 정리하길 잘했다는 생각이 든다.</p>
+
+<p>유전 데이터 분석 기능 구현부터 분석 결과 저장까지 약 한 달 정도의 시간이 걸렸던 것 같은데 이렇게 좋은 경험을 쌓을 수 있어서 나름 좋은 것 같다.</p>
+
+<p>관련 기능이 없어져서 관련한 모든 것들이 사라져서 조금 아쉽긴하네…</p>
+
+<p><del><em>하지만 함께해서 별로였고 다신 내가 쓰는 데이터로 만나지 말자 VEP.. ^^..</em></del></p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html" title="ELK Security 설정">ELK Security 설정</a><a class="next" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html" title="Spring-Elasticsearch 연동 1- Spring 설정">Spring-Elasticsearch 연동 1- Spring 설정</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html" title="Spring-Elasticsearch 연동 1- Spring 설정">ELK - POSTGRES to LOGSTASH</a></li>
+<li><a class="post-link" href="/git/2021/04/03/Fork%ED%95%9C-Repository-%EC%B5%9C%EC%8B%A0%EC%9C%BC%EB%A1%9C-%EB%8F%99%EA%B8%B0%ED%99%94-%ED%95%98%EA%B8%B0.html" title="Spring-Elasticsearch 연동 1- Spring 설정">Fork한 repository 최신으로 동기화 하기</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/02/URI%EC%99%80-%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%9A%94%EC%B2%AD-%ED%9D%90%EB%A6%84.html" title="Spring-Elasticsearch 연동 1- Spring 설정">URI</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/04/HTTP-%EA%B8%B0%EB%B3%B8.html" title="Spring-Elasticsearch 연동 1- Spring 설정">HTTP</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

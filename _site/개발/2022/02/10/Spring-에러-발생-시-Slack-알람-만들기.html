@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Spring 에러 발생 시, Slack 알람 만들기 | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Spring 에러 발생 시, Slack 알람 만들기">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.">
+<meta property="og:description" content="지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-02-10T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Spring 에러 발생 시, Slack 알람 만들기">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2022-02-10T00:00:00+09:00","datePublished":"2022-02-10T00:00:00+09:00","description":"지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.","headline":"Spring 에러 발생 시, Slack 알람 만들기","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">Spring 에러 발생 시, Slack 알람 만들기</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2022-02-10T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Feb 10, 2022
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 9 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#logging">#logging</a><a class="post-tag" href="/tags.html#Slack">#Slack</a><a class="post-tag" href="/tags.html#logback-slack-appender">#logback-slack-appender</a><a class="post-tag" href="/tags.html#%EC%95%8C%EB%9E%8C">#알람</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.</p>
+
+<p>사용자 요청이 들어오면, 분석 서버로 분석을 요청하고, 그 후 작업은 비동기로 처리하고 있는데,  서버로 올렸을 경우 에러가 언제 발생했는지 모르고 그냥 지나치는 경우가 종종 있었다!  이것 말고도, 사용자가 사용했을 때, 예상하지 못했던 에러가 발생했어도 모르고 지나가는 일도 있었고..</p>
+
+<p>무튼, 여러모로 에러가 발생하면 알림오면 좋겠다고 생각을 했었다.</p>
+
+<p>2가지 방법으로 테스트를 했었고, 이에대한 기록을 남기고자한다!</p>
+
+<h2 id="1-logback-slack-appender">1.​ logback-slack-appender</h2>
+
+<p>Spring에 관련 기능이 있을까 하여 검색해보니 가장 대표적으로 사용하는 것이 logback-slack-appender 라이브러리 였다.</p>
+
+<p>logback에서 error 로그와 관련한 부분이 생기면 이벤트를 발생시켜 사용하는 방법인 것 같다.</p>
+
+<h3 id="적용-방법">적용 방법</h3>
+
+<p>기본적인 사용 방법은 링크의 이 <a href="https://velog.io/@haerong22/Spring-%EC%8A%AC%EB%9E%99%EC%97%90-%EB%A1%9C%EA%B7%B8-%EB%82%A8%EA%B8%B0%EA%B8%B0">블로그</a>를 참고하여 개발하였다.</p>
+
+<p>에러 알림을 만든다고 하였을 때, alpha 서버의 에러만 받도록 해달라는 팀장님의 요청이 있었고, 어찌어찌 alpha 서버 관련한 profile만 적용할 수 있도록 수정하였다.</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--알림이 필요한 profile--&gt;</span>	
+<span class="nt">&lt;springProfile</span> <span class="na">name=</span><span class="s">"alpha"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">resource=</span><span class="s">"logback-alpha.yml"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;appender</span> <span class="na">name=</span><span class="s">"SLACK_ERROR"</span> <span class="na">class=</span><span class="s">"com.github.maricn.logback.SlackAppender"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;webhookUri&gt;</span>${webhook-uri}<span class="nt">&lt;/webhookUri&gt;</span>
+      <span class="nt">&lt;channel&gt;</span>#${channel}<span class="nt">&lt;/channel&gt;</span>
+        <span class="nt">&lt;layout</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.PatternLayout"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;pattern&gt;</span>*${LOG_PATTERN}*%n<span class="nt">&lt;/pattern&gt;</span>
+        <span class="nt">&lt;/layout&gt;</span>
+      <span class="nt">&lt;username&gt;</span>${username}<span class="nt">&lt;/username&gt;</span>
+      <span class="nt">&lt;iconEmoji&gt;</span>:${emoji}:<span class="nt">&lt;/iconEmoji&gt;</span>
+      <span class="nt">&lt;colorCoding&gt;</span>true<span class="nt">&lt;/colorCoding&gt;</span>
+    <span class="nt">&lt;/appender&gt;</span>
+    <span class="nt">&lt;appender</span> <span class="na">name=</span><span class="s">"ASYNC_SLACK_ERROR"</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.AsyncAppender"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;appender-ref</span> <span class="na">ref=</span><span class="s">"SLACK_ERROR"</span><span class="nt">/&gt;</span>
+      <span class="nt">&lt;filter</span> <span class="na">class=</span><span class="s">"ch.qos.logback.classic.filter.ThresholdFilter"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;level&gt;</span>ERROR<span class="nt">&lt;/level&gt;</span>
+      <span class="nt">&lt;/filter&gt;</span>
+    <span class="nt">&lt;/appender&gt;</span>
+  <span class="nt">&lt;/springProfile&gt;</span>
+
+<span class="c">&lt;!--알림이 필요하지 않는 profile--&gt;</span>	
+  <span class="nt">&lt;springProfile</span> <span class="na">name=</span><span class="s">"beta"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">resource=</span><span class="s">"logback-beta.yml"</span><span class="nt">/&gt;</span>
+  <span class="nt">&lt;/springProfile&gt;</span>
+</code></pre></div></div>
+
+<h3 id="후기-및-장-단점">후기 및 장, 단점</h3>
+
+<p>회사에서 서버를 3개를 쓰고 있는데, 무사히 alpha서버만 에러를 띄우는데 성공했다!</p>
+
+<p>하지만 성공하고 에러를 보니, 장점보단 단점이 너무 명확하게 보였다..</p>
+
+<p>일단, 위에 logback-spring.xml 처럼 profile 별로 나눠 사용하는 것은 좋았으나,  ${username} 같은 관련 설정은 알람 기능을 사용하지 않는 beta 서버에도 작성을 해주어야 했었다. (logback-beta.yml 파일에.. 이건 내가 몰라서 그랬을지도… )</p>
+
+<p>또한, 알림이 오는 것 까진 좋았지만 exception에 관련한 거의 모든 데이터가 넘어와 어디서 에러가 발생했는지 확인하기 어려웠다.</p>
+
+<p>마지막으로 확인하고 싶지 않은 에러까지 다 넘어왔다. 예를들면 회원이 비밀번호가 틀렸다.. 이런 에러까지..</p>
+
+<p>장점은.. logback 기반이다보니, log.error() 코드로 작성한 에러도 잡힌다는 점..?</p>
+
+<p>아무튼, 이런 로그는 받아봤자 별로일 것 같아서 다시 관련된 사항을 검색해 보았고,</p>
+
+<p>우아한 형제 테크코스에서 손너잘님이 만드셨다는 슬랙알람 기능을 보게되었다!</p>
+
+<h2 id="2-slack-alaram">2. slack alaram</h2>
+
+<p>일단 사용 후기 작성 전, 손너잘님께 감사의 인사를 보냅니다..!</p>
+
+<p>자세한 개발 방법은 <a href="https://bperhaps.tistory.com/entry/Spring-Slack-Alarm-Logger-%EB%A7%8C%EB%93%A4%EA%B8%B0">손너잘님의 블로그</a>를 참고!</p>
+
+<p>사실 참고라고 할 것도 없이, 개발하신 코드를 복붙해서 사용했다 ^^..</p>
+
+<p>손너잘님의 코드는 한번에 사용할 수 있을 정도로 너무 좋았고 깔끔했고 짱이었고 최고였고 다했지만..</p>
+
+<p>원하는 부분이 조금(?) 달라 수정하여 사용하였다.</p>
+
+<p>수정 부분은 다음과 같다</p>
+
+<h4 id="개발자가-정의한-exception과-의도치-않은-exception-구분">개발자가 정의한 Exception과 의도치 않은 Exception 구분</h4>
+
+<p>우리 프로젝트에서 Exception 전략을 <a href="https://cheese10yun.github.io/spring-guide-exception/">cheese10yun 님의 블로그</a>를 참고하여 만들었다..</p>
+
+<p>BusinessException은 개발자가 정의한 Exception이고, 그렇지 않은 경우는 그냥 Exception이 발생하게 된다.</p>
+
+<p>팀원들은 어떻게 생각할지 모르겠지만.. 그냥 Exception이 발생한 경우가 좀 더 급한(?) 상황이라고 생각하였고, 이 경우에는 슬랙 메세지에<img class="emoji" title=":rotating_light:" alt=":rotating_light:" raw="🚨" src="https://github.githubassets.com/images/icons/emoji/unicode/1f6a8.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))">를 달아 보내도록 수정해 보았다!</p>
+
+<p>사실 별건 없고, headerMessage를 정할 시,  <code class="language-plaintext highlighter-rouge">arg instanceof BusinessException </code> 를 통해 구분만 해주었다.</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SlackMessageGenerator</span> <span class="o">{</span>
+	
+   <span class="c1">//...</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">EXCEPTION_MESSAGE_FORMAT</span> <span class="o">=</span> <span class="s">"`[%s] %s.%s:%d`\n`%s`"</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="nc">String</span> <span class="no">EXCEPTION_HEADER_MESSAGE</span> <span class="o">=</span> <span class="s">":rotating_light: *[Exception 발생]* :rotating_light: \n"</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">generate</span><span class="o">(</span><span class="nc">ContentCachingRequestWrapper</span> <span class="n">request</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">arg</span><span class="o">,</span>
+		<span class="nc">SlackAlarmErrorLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">headerMessage</span> <span class="o">=</span>
+				<span class="n">arg</span> <span class="k">instanceof</span> <span class="nc">BusinessException</span> <span class="o">?</span> <span class="no">BUSINESS_EXCEPTION_HEADER_MESSAGE</span> <span class="o">:</span> <span class="no">EXCEPTION_HEADER_MESSAGE</span><span class="o">;</span>
+		
+            <span class="c1">//후략...</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="원하는-exception만-알림-오게-하기">원하는 Exception만 알림 오게 하기</h4>
+
+<p>프로젝트 상에서 모든 Exception들을 @ExceptionHandler로 지정해 놓지 않았기 때문에, 대부분의 Exception은 BusinessException으로 들어온다.</p>
+
+<p>이에 따른 문제점이 logback-slack-appender을 사용할 때와 같이 대부분의 에러가 넘어온다는 것 이었다! (사용자 패스워드 틀림과 같은.. ) 그래서 이 부분을 나름대로 수정해보았다.</p>
+
+<p>Exception 전략에서 ErrorCode를 지정하여 메세지나 상태 코드 등을 지정하는 부분이 있었는데, 커스텀하게 만든 Exception들은 각자의 ErrorCode를 가지도록 개발하였다.</p>
+
+<p>예를 들면,  아래 코드와 같이 구성한다! 자세한건 위의 블로그..</p>
+
+<p>간단히 설명하면, 로직 중 UserHasNotAuthException를 발생 시키면 @ExceptionHandler가 BusinessException을 받아 응답하는 구조이다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">UserHasNotAuthException</span> <span class="kd">extends</span> <span class="nc">BusinessException</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="nf">UserHasNotAuthException</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kd">super</span><span class="o">(</span><span class="nc">ErrorCode</span><span class="o">.</span><span class="na">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">);</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+  <span class="no">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">(</span><span class="mi">403</span><span class="o">,</span> <span class="s">"P001"</span><span class="o">,</span> <span class="s">"파일 다운로드 권한이 없습니다."</span><span class="o">),</span>
+  <span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>여기서 ErrorCode ENUM에 <code class="language-plaintext highlighter-rouge">alamable</code> 값을 추가하여 원하는 에러만 알람을 받을 수 있도록 수정해 보았다.</p>
+
+<p><strong>ErrorCode.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="nc">ErrorCode</span> <span class="o">{</span>
+  <span class="no">USER_HAS_NOT_EXCEL_AUTH</span><span class="o">(</span><span class="mi">403</span><span class="o">,</span> <span class="s">"P001"</span><span class="o">,</span> <span class="s">"파일 다운로드 권한이 없습니다."</span><span class="o">,</span> <span class="kc">true</span><span class="o">),</span>
+  <span class="no">OTHER_ERROR</span><span class="o">(</span><span class="mi">500</span><span class="o">,</span> <span class="s">"A001"</span><span class="o">,</span> <span class="s">"..."</span><span class="o">,</span> <span class="kc">false</span><span class="o">),</span>
+  <span class="c1">//...중략</span>
+   <span class="kd">private</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="n">alamable</span><span class="o">;</span>
+   <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isAlamable</span><span class="o">(){</span><span class="k">return</span> <span class="n">alamable</span><span class="o">;}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><strong>ExceptionAppender.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">appendExceptionToResponseBody</span><span class="o">(</span><span class="nc">JoinPoint</span> <span class="n">joinPoint</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">//...</span>
+
+    <span class="k">if</span><span class="o">(</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="k">instanceof</span> <span class="nc">BusinessException</span><span class="o">){</span>
+
+        <span class="nc">BusinessException</span> <span class="n">exception</span><span class="o">=</span> <span class="o">(</span><span class="nc">BusinessException</span><span class="o">)</span><span class="n">args</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+
+        <span class="k">if</span><span class="o">(!</span><span class="n">exception</span><span class="o">.</span><span class="na">getErrorCode</span><span class="o">().</span><span class="na">isAlamable</span><span class="o">()){</span>
+            <span class="k">return</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>ExceptionAppender에 위의 코드 if문만 추가해 주었다.</p>
+
+<p>BusinessException 타입인 경우 isAlamable() 함수를 통해 알람을 보낼지 말지 결정한다.</p>
+
+<h4 id="비동기로-동작하는-부분-알림-설정">비동기로 동작하는 부분 알림 설정</h4>
+
+<p>사실 내가 알람 기능을 개발한 이유가 이 비동기로 작동하는 부분 때문인데, 비동기 처리시 발생하는 알림은 오지 않았다.</p>
+
+<p>그러다가 비동기 에러는 따로 설정을 해주어야 한다는 것을 깨닫고 관련 설정을 해주었다.</p>
+
+<p><strong>AsyncConfig.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AsyncConfig</span> <span class="kd">implements</span> <span class="nc">AsyncConfigurer</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Slack</span> <span class="n">slack</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+ 
+    <span class="c1">//....</span>
+    
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="nc">AsyncUncaughtExceptionHandler</span> <span class="nf">getAsyncUncaughtExceptionHandler</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">CustomAsyncExceptionHandler</span><span class="o">(</span><span class="n">slack</span><span class="o">,</span> <span class="n">slackMessageGenerator</span><span class="o">);</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>위의 코드와 같이 getAsyncUncaughtExceptionHandler()를 Override하여 CustomAsyncExceptionHandler를 만들어 주어야 한다. 이 때, 알림 관련 bean들을 주입해 주었다.</p>
+
+<p><strong>CustomAsyncExceptionHandler.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CustomAsyncExceptionHandler</span> <span class="kd">implements</span> <span class="nc">AsyncUncaughtExceptionHandler</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">Slack</span> <span class="n">slack</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="kd">final</span> <span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">CustomAsyncExceptionHandler</span><span class="o">(</span><span class="nc">Slack</span> <span class="n">slack</span><span class="o">,</span>
+		<span class="nc">SlackMessageGenerator</span> <span class="n">slackMessageGenerator</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">slack</span> <span class="o">=</span> <span class="n">slack</span><span class="o">;</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">slackMessageGenerator</span> <span class="o">=</span> <span class="n">slackMessageGenerator</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">handleUncaughtException</span><span class="o">(</span>
+		<span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">,</span> <span class="nc">Method</span> <span class="n">method</span><span class="o">,</span> <span class="nc">Object</span><span class="o">...</span> <span class="n">obj</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">slackMessageGenerator</span><span class="o">.</span><span class="na">generateAsync</span><span class="o">(</span><span class="n">throwable</span><span class="o">,</span><span class="n">method</span><span class="o">);</span>
+		<span class="n">slack</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+		<span class="n">throwable</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		
+	<span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>CustomAsyncExceptionHandler에서 비동기 에러가 발생할 시, 메세지를 정의하고 슬랙 알람을 보냈다.</p>
+
+<p>기존에 사용하던 <code class="language-plaintext highlighter-rouge">generate</code>메소드와는 다른 부분이 있어 <code class="language-plaintext highlighter-rouge">generateAsync</code>를 새로 만들어서 사용하였다.</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SlackMessageGenerator</span> <span class="o">{</span>
+<span class="c1">//...</span>
+  <span class="kd">public</span> <span class="nc">String</span> <span class="nf">generateAsync</span><span class="o">(</span><span class="nc">Throwable</span> <span class="n">throwable</span><span class="o">,</span> <span class="nc">Method</span> <span class="n">method</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">String</span> <span class="n">headerMessage</span> <span class="o">=</span> <span class="s">"*[Async Exception 발생]*\n"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">currentTime</span> <span class="o">=</span> <span class="n">getCurrentTime</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">userId</span> <span class="o">=</span> <span class="n">getUserId</span><span class="o">();</span>
+			<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="s">"unknown"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">errorLog</span> <span class="o">=</span> <span class="n">extractMessage</span><span class="o">((</span><span class="nc">Exception</span><span class="o">)</span><span class="n">throwable</span><span class="o">,</span> <span class="nc">SlackAlarmErrorLevel</span><span class="o">.</span><span class="na">ERROR</span><span class="o">);</span>
+			<span class="nc">String</span> <span class="n">methodStr</span> <span class="o">=</span> <span class="s">"METHOD"</span><span class="o">;</span>
+			<span class="nc">String</span> <span class="n">requestURI</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+
+			<span class="k">return</span> <span class="nf">toMessage</span><span class="o">(</span><span class="n">headerMessage</span><span class="o">,</span><span class="n">currentTime</span><span class="o">,</span> <span class="n">userId</span><span class="o">,</span><span class="n">ip</span><span class="o">,</span> <span class="n">errorLog</span><span class="o">,</span> <span class="n">methodStr</span><span class="o">,</span> <span class="n">requestURI</span><span class="o">);</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="nc">String</span><span class="o">.</span><span class="na">format</span><span class="o">(</span><span class="no">EXTRACTION_ERROR_MESSAGE</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+
+<span class="c1">//...</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>동기 통신이었다면, api 경로가 출력됐을텐데, 비동기라 메소드 이름 출력으로 대신하였다.</p>
+
+<h4 id="기타-자잘한-사항">기타 자잘한 사항..</h4>
+
+<p>알람 기능 개발 중 접속자 IP도 확인할 수 있으면 좋을 것 같다는 팀장님의 요청에 간단히 한 줄 추가하였다.</p>
+
+<p>비동기 통신은 ip를 확인 할 수 없어 unknown으로 대신하였다..</p>
+
+<p><strong>SlackMessageGenerator.java</strong></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">generate</span><span class="o">(</span><span class="nc">ContentCachingRequestWrapper</span> <span class="n">request</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">arg</span><span class="o">,</span>
+		<span class="nc">SlackAlarmErrorLevel</span> <span class="n">level</span><span class="o">)</span> <span class="o">{</span>
+    	<span class="c1">//...</span>
+			<span class="nc">String</span> <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getRemoteAddr</span><span class="o">();</span>
+    	<span class="c1">//... </span>
+	<span class="o">}</span>
+</code></pre></div></div>
+
+<p><em>덧, 손너잘님의 코드는  Exception을 처리하는 로직이라 error.log는 잡지 못하는 경우도 처리하고 싶었지만… 이 부분은 과감히 포기했다… 좀 더 생각해 봐야 할 것 같다…</em></p>
+
+<h2 id="본격-후기">본격 후기</h2>
+
+<p>일단 슬랙 알람 만든 나에게 박수<img class="emoji" title=":clap:" alt=":clap:" raw="👏" src="https://github.githubassets.com/images/icons/emoji/unicode/1f44f.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))"><img class="emoji" title=":clap:" alt=":clap:" raw="👏" src="https://github.githubassets.com/images/icons/emoji/unicode/1f44f.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))"><img class="emoji" title=":clap:" alt=":clap:" raw="👏" src="https://github.githubassets.com/images/icons/emoji/unicode/1f44f.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))"><img class="emoji" title=":clap:" alt=":clap:" raw="👏" src="https://github.githubassets.com/images/icons/emoji/unicode/1f44f.png" style="vertical-align: middle; display: inline; max-width: 1em; visibility: hidden;" onload="this.style.visibility='visible'" onerror="this.replaceWith(this.getAttribute('raw'))"></p>
+
+<p>좋은 코드 제공해주신 손너잘님 마지막으로 감사합니다 :)</p>
+
+<p>손너잘님의 글을 보면서 spring을 깊게깊게 공부해야겠다는 생각이 빡 들었다.</p>
+
+<p>난 너무 겉핥기야..</p>
+
+<p>조금 더 공부한다면 에러 알림 시 조금씩 발생하는 에러를 쉽게 고칠 수 있지 않을까 생각한다!</p>
+
+<p><del>(request에 가끔 null이 들어오고 이런 문제들… 사실 scope의 문제인걸 알고있지만.. 안되는걸.. )</del></p>
+
+<p>가끔 오는 에러 알림마다 뭔가 반가우면서 조금 짜증나지만 ^^..</p>
+
+<p>즐겁게 발생하는 에러를 수정해야겠다! 후기 끝</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0.html" title="2022 맞이 2021 회고">2022 맞이 2021 회고</a><a class="next" href="/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html" title="ELK - POSTGRES to LOGSTASH">ELK - POSTGRES to LOGSTASH</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/02/URI%EC%99%80-%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%9A%94%EC%B2%AD-%ED%9D%90%EB%A6%84.html" title="ELK - POSTGRES to LOGSTASH">URI</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html" title="ELK - POSTGRES to LOGSTASH">특정 API만 Swagger에 노출</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html" title="ELK - POSTGRES to LOGSTASH">Spring Batch Insert 어떻게 해결했을까</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/03/31/%EC%9D%B8%ED%84%B0%EB%84%B7-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC.html" title="ELK - POSTGRES to LOGSTASH">인터넷 네트워크</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

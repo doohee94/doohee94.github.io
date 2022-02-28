@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>ELK - POSTGRES to LOGSTASH | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="ELK - POSTGRES to LOGSTASH">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 여기에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.">
+<meta property="og:description" content="postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 여기에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2022-02-17T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="ELK - POSTGRES to LOGSTASH">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2022-02-17T00:00:00+09:00","datePublished":"2022-02-17T00:00:00+09:00","description":"postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 여기에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.","headline":"ELK - POSTGRES to LOGSTASH","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html"},"url":"http://localhost:4000/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">ELK - POSTGRES to LOGSTASH</h1>
+  <h2 class="post-subtitle"></h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2022-02-17T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Feb 17, 2022
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a><a class="post-tag" href="/tags.html#postgres">#postgres</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <p>postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 <a href="http://doohee94.github.io/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html">여기</a>에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.</p>
+
+<p>우선, 아래와 같은 conf 파일을 logstash에서 기본적으로 사용한다고 가정한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code># cd logstash/pipeline
+# vi {이름}.conf
+</code></pre></div></div>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>input {
+  jdbc {
+     jdbc_connection_string =&gt; "jdbc:postgresql://{IP}:{PORT}/{DATABASE}"
+     jdbc_user =&gt; "{USER}"
+     jdbc_password =&gt; "{PASSWORD}"
+     jdbc_driver_class =&gt; "org.postgresql.Driver"
+     jdbc_driver_library =&gt; "/usr/share/logstash/logstash-core/lib/jars/postgresql.jar"
+
+     statement =&gt; "select * from test.test test where id &gt;= ? and id&lt; ? + ?  order by id asc"
+
+     use_column_value =&gt; true
+     tracking_column =&gt; "id"
+     tracking_column_type =&gt; "numeric"
+
+     use_prepared_statements =&gt; true
+     prepared_statement_bind_values =&gt; [":sql_last_value", ":sql_last_value", 10000]
+     prepared_statement_name =&gt; "id"
+
+     last_run_metadata_path =&gt; "/usr/share/logstash/last_run_metadata/last_value_1.yml"
+
+     jdbc_pool_timeout =&gt; 300
+     schedule =&gt; "0 * * * *"
+
+ }
+}
+
+output {
+  elasticsearch {
+    hosts =&gt; ["http://elasticsearch:9200"]
+    index =&gt; "my_index"
+    document_id =&gt; "%{id}"
+    doc_as_upsert =&gt; true
+    template =&gt; "/usr/share/logstash/template/my_basic_template.json"
+    user =&gt; "elastic"
+    password =&gt; "changegame!"
+
+ }
+}
+</code></pre></div></div>
+
+<h2 id="1-pipeline">1. pipeline</h2>
+
+<p><del>보통 logstsh의 pipeline을 사용하는 경우, <code class="language-plaintext highlighter-rouge">pipeline.yml</code>파일을 생성해서 관리를 해준다고 하는데, docker-elk의 경우는 pipeline 폴더에 원하는 설정파일들을 생성해 준 후,  <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>내 파일의 경로만 잘 설정해 준다면 문제 없이 작동하는 것 같다.</del></p>
+
+<blockquote>
+  <p><del>하지만 이럴경우 훗날 설정파일이 많아졌을 때 관리하기가 힘들어 지는 일이 생기니.. yml파일을 만들어서 사용하는것이 좋을 것 같다 😅</del></p>
+</blockquote>
+
+<p><em>22년 2월 17일 수정</em></p>
+
+<p>pipelines.yml이 필요한게 맞았다!!</p>
+
+<p>하나의 서버에서 각기 다른 설정으로 conf 파일을 2개 만들었었는데, 자꾸 두 인덱스가 겹치는 문제가 발생해서 확인해 보니, pipelines.yml 파일 설정을 해주지 않아 데이터가 두 인덱스로 다 들어가버렸다.. 이걸로 몇날며칠 고생했다 ㅂㄷㅂㄷ..</p>
+
+<p><strong>pipelines.yml</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">-</span> <span class="na">pipeline.id</span><span class="pi">:</span> <span class="s">dev</span>
+  <span class="na">path.config</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/usr/share/logstash/pipeline/dev.conf"</span>
+<span class="pi">-</span> <span class="na">pipeline.id</span><span class="pi">:</span> <span class="s">prod</span>
+  <span class="na">path.config</span><span class="pi">:</span> <span class="s2">"</span><span class="s">/usr/share/logstash/pipeline/prod.conf"</span>
+
+</code></pre></div></div>
+
+<p>이렇게 pipeliens.yml 설정해 주고, docker-compose.yml 파일에서 pipelines.yml 파일의 경로도 잡아주면 된다! <a href="https://psawesome.tistory.com/70">참고</a></p>
+
+<h2 id="2-sql_last_value-파일">2. sql_last_value 파일</h2>
+
+<p>설정파일이 많아질 경우, last_value의 값도 많아지는 경우가 생긴다.</p>
+
+<p>이럴 경우 파일을 각각 생성해서 관리하는 것이 좋을 것 같다.</p>
+
+<p>나같은 경우 logstash 디렉토리에 <code class="language-plaintext highlighter-rouge">last_run_metadata</code> 디렉토리를 생성하여 그 안에서 파일을 따로 관리하였다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>last_run_metadata_path =&gt; "/usr/share/logstash/last_run_metadata/last_value_1.yml"
+</code></pre></div></div>
+
+<p>설정 파일 내부에 해당 파일을 적용시켜 줄 수 있다.</p>
+
+<h2 id="3-index-template-파일">3. index template 파일</h2>
+
+<p>postgres에서 아무런 설정 없이 index를 생성할 경우 컬럼이 자동매핑되어 데이터가 저장된다.</p>
+
+<p>이럴경우 string data type 저장 시, 문제가 발생하게 된다.</p>
+
+<p>기본적으로 string은 text type과 keyword type으로 나뉘는데, 자동매핑인 경우 이 두 타입을 모두 저장하게 된다.</p>
+
+<p>그러면 데이터의 크기도 커질 뿐만아니라 쿼리를 실행시킬 시 시간도 오래걸리고, 정확한 값을 찾을 경우에는 <code class="language-plaintext highlighter-rouge">name.keyword</code> 이런식으로 키워드를 검색해주어야 한다.</p>
+
+<p>그래서 logstash를 이용해 저장할 경우 기본 템플릿을 정하여 데이터를 매핑 시킬 수 있다.</p>
+
+<p><strong>template 파일 예시</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+    </span><span class="nl">"index_patterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="s2">"my_index*"</span><span class="w">
+    </span><span class="p">],</span><span class="w">
+    </span><span class="nl">"mappings"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"properties"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"ignore_above"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483647</span><span class="w">
+
+            </span><span class="p">},</span><span class="w">
+            </span><span class="nl">"title"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"keyword"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"ignore_above"</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483647</span><span class="w">
+
+            </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"score"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"float"</span><span class="w">
+            </span><span class="p">},</span><span class="w">
+              </span><span class="nl">"age"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"long"</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<blockquote>
+  <ul>
+    <li>keyword 타입을 지정할 경우 <code class="language-plaintext highlighter-rouge">ignore_above</code>값을 지정해 주는 것이 좋다. 기본값은 256인데, 256자가 넘어가게 되면 짤려서 저장이 되기 때문이다. 최대 값은 2147483647이다.</li>
+    <li>index_patterns는 해당 템플릿을 적용할 인덱스의 title을 지정할 수 있다. 정규표현식을 사용한다.</li>
+  </ul>
+</blockquote>
+
+<p>해당 파일을 만들면, conf 파일에서 설정해준다.</p>
+
+<p>나같은 경우 logstash에 template 디렉토리만들어 그 안에 템플릿을 저장하였다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>template =&gt; "/usr/share/logstash/template/my_basic_template.json"
+</code></pre></div></div>
+
+<h2 id="4-docker-composeyml-파일-수정">4. docker-compose.yml 파일 수정</h2>
+
+<p>위에서 템플릿 파일이나 logstash 설정파일, last_value 파일 등등 여러개 파일을 생성하였다.</p>
+
+<p>생성한 파일의 경로를 docker 경로에 맞게 설정해주어야 한다.</p>
+
+<p>또한, docker 이미지 생성 시, 생성한 파일들도 생성할 수 있도록 명령어를 작성해 넣어주어야 한다.</p>
+
+<p><strong>docker-compose.yml 예시</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="na">logstash</span><span class="pi">:</span>
+   <span class="s">...</span>
+    <span class="s">command</span><span class="err">:</span> <span class="s">/bin/sh -c "touch /usr/share/logstash/last_run_metadata/last_value_1.yml</span>
+                        <span class="s">&amp;&amp; bin/logstash</span>
+                        <span class="s">&amp;&amp; touch /usr/share/logstash/template/my_basic_template.json</span>
+                        <span class="s">&amp;&amp; bin/logstash"</span>
+    <span class="s">volumes</span><span class="err">:</span>
+     <span class="s">...</span>
+      <span class="s">- ./logstash/last_run_metadata/:/usr/share/logstash/last_run_metadata/</span>
+      <span class="s">- ./logstash/template/:/usr/share/logstash/template/</span>
+<span class="nn">...</span>
+
+</code></pre></div></div>
+
+<ol>
+  <li>
+    <p>command 부분의 명령어를 통해 생성한 last_value 파일과 템플릿 파일을 docker 경로에 설정해준다.</p>
+  </li>
+  <li>
+    <p>새로 생성한 디렉토리가 있다면,  volumes 부분에 경로를 설정해준다.</p>
+
+    <p><code class="language-plaintext highlighter-rouge">ex) {내가 만든 경로}:{docker에 설정할 경로}</code></p>
+  </li>
+</ol>
+
+<h2 id="5permission-denied">5.Permission denied</h2>
+
+<p>last_value 파일이나 템플릿 파일을 생성해서 사용할 경우, Permission denied 문제가 발생한다.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chown 1000:1000 -R 해당 폴더
+</code></pre></div></div>
+
+<p>상단의 명령어를 통해 권한 문제를 해결할 수 있다. (참고 블로그 확인)</p>
+
+<h2 id="참고">참고</h2>
+
+<p><a href="https://github.com/deviantony/docker-elk">docker-elk git</a></p>
+
+<p><a href="https://epicarts.tistory.com/66">permission denied</a></p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html" title="Spring 에러 발생 시, Slack 알람 만들기">Spring 에러 발생 시, Slack 알람...</a><span></span>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html" title="">DOCKER에서 ELK 설치 및 사용하기</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html" title="">Spring-Elasticsearch 연동 1- Spring 설정</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html" title="">ELK query 사용 정리</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html" title="">Spring-Elasticsearch 연동 2 - Query Builder</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

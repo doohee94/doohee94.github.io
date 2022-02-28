@@ -1,0 +1,3127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Home | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="Home">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.">
+<meta property="og:description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.">
+<link rel="canonical" href="http://localhost:4000/">
+<meta property="og:url" content="http://localhost:4000/">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="Home">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"doohee94"},"description":"Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.","headline":"Home","name":"URMOO BLOG","url":"http://localhost:4000/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header site-header-transparent" role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;documentElement.setAttribute("data-header-transparent", "");var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<section class="page-banner">
+    <div class="page-banner-img">
+<div style="background-image: url(/assets/images/banners/test4.jpg)"></div>
+        <img class="img-placeholder" src="/assets/images/banners/test4.jpg">
+</div>
+    <div class="wrapper">
+      <div class="page-banner-inner"><div class="page-banner-default">
+            <h1 class="page-banner-heading">
+              URMOO BLOG
+            </h1>
+            <h2 class="page-banner-subheading">
+              
+            </h2>
+          </div></div>
+    </div>
+  </section><script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="articles">
+  
+
+  
+
+
+  <div class="pagination">
+  <!-- Post list links -->
+  <ul class="post-list">
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html">
+          ELK - POSTGRES to LOGSTASH
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Feb 17, 2022</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2022/02/17/POSTGRES-to-LOGSTASH.html">
+        <p>
+        postgres 데이터를 logstash를 이용해 elasticsearch에 저장하는 방법은 여기에 있지만, 그 후에 더 추가해서 사용한 방법이 있어 따로 정리해보았다.
+
+우선, 아래와 같은 conf 파일을 logstash에서 기본적으로 사용한다고 가정한다.
+
+# cd logstash/pipeline
+# vi {이름}.conf
+
+
+input {
+  jdbc {
+     jdbc_connection_string =&gt; "jdbc:postgresql://{IP}:{PORT}/{DATABASE}"
+     jdbc_user =&gt; "{USER}"
+     jdbc_password =&gt; "{PASSWORD}"... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a><a class="post-tag" href="/tags.html#postgres">#postgres</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html">
+          Spring 에러 발생 시, Slack 알람 만들기
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Feb 10, 2022</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 9 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2022/02/10/Spring-%EC%97%90%EB%9F%AC-%EB%B0%9C%EC%83%9D-%EC%8B%9C-Slack-%EC%95%8C%EB%9E%8C-%EB%A7%8C%EB%93%A4%EA%B8%B0.html">
+        <p>
+        지금 진행하고 있는 프로젝트 중 환자의 유전자 데이터를 분석하여 관련 데이터를 제공하는 기능이 있다.
+
+사용자 요청이 들어오면, 분석 서버로 분석을 요청하고, 그 후 작업은 비동기로 처리하고 있는데,  서버로 올렸을 경우 에러가 언제 발생했는지 모르고 그냥 지나치는 경우가 종종 있었다!  이것 말고도, 사용자가 사용했을 때, 예상하지 못했던 에러가 발생했어도 모르고 지나가는 일도 있었고..
+
+무튼, 여러모로 에러가 발생하면 알림오면 좋겠다고 생각을 했었다.
+
+2가지 방법으로 테스트를 했었고, 이에대한 기록을 남기고자한다!
+
+1.​ logback-slack-appender
+
+Spring에 관련 기능이 있을까 하여 검... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#logging">#logging</a><a class="post-tag" href="/tags.html#Slack">#Slack</a><a class="post-tag" href="/tags.html#logback-slack-appender">#logback-slack-appender</a><a class="post-tag" href="/tags.html#%EC%95%8C%EB%9E%8C">#알람</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0.html">
+          2022 맞이 2021 회고
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Jan 03, 2022</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 7 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%ED%9A%8C%EA%B3%A0/2022/01/03/2022-%EB%A7%9E%EC%9D%B4-2021-%ED%9A%8C%EA%B3%A0.html">
+        <p>
+        2022 맞이 2021 회고
+
+12월 즈음 부터 여기저기서 다른 개발자 분들의 회고를 보았다.
+
+다른 분들의 글들을 보면서 과연 나는 2021년에 무엇을 했는가를 생각하게 되었고..
+
+생각만 하다가  나도 글로 남기면 좋을 것 같아 이렇게 글을 작성하게 되었다.
+
+
+  회고를  글로 쓰면 좋을 것 같았던 것 ^^..
+
+  
+    자기반성
+    자아비판
+    내가 왜그랬을까 후회
+  
+
+
+첫 회고를 쓰니 간단히 이력을 작성해보자면,
+
+2020년 2월 1일에 현재 회사에 입사했고,
+
+2022년 현재 2년이 1개월 남은,1년 11개월차  백엔드개발자 이다.
+
+입사해서 2개의 프로젝트를 진행하였는데, 하나는 작년에 ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#2021">#2021</a><a class="post-tag" href="/tags.html#%ED%9A%8C%EA%B3%A0">#회고</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html">
+          특정 API만 Swagger에 노출
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Dec 16, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 2 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/12/16/%ED%8A%B9%EC%A0%95-API%EB%A7%8C-swagger%EC%97%90-%EB%85%B8%EC%B6%9C.html">
+        <p>
+        현재 프로젝트에 개발 서버가 2대가 있는데, 이 중 한 서버에서는 특정 API 만 swagger에 노출 해야 하는 문제가 발생하였다.
+
+swagger를 설정 할 때, basepackage를 지정해서 사용하는 방법도 있지만, 그럼 컨트롤러에 있는 모든 API가 노출되기도 하고…별로인 부분이 있어
+
+그보다 좀더 커스텀하게..? 사용 할 수 있는 방법을 찾아 적용해 보았다.
+
+Profile 설정
+
+아래와 같이 profile을 만들고 각 서버에 맞는 profile에 include 시켜주었다.
+
+(파일을 만들지 않고 바로 넣는것도 가능한…!)
+
+특정 API만 노출해야하는 서버라면 true,  전체 노출 하는 서버라면 fal... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#swagger">#swagger</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html">
+          Spring-Elasticsearch 연동 2 - Query Builder
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Dec 09, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 8 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html">
+        <p>
+        유용한 참고자료
+
+
+  Java High Level Rest Client 사용 정리 guide
+
+
+1. 기본 사용법
+
+Spring Elasticsearch 연동 1과 같이 설정을 완료하였다면, 바로 호출해서 사용가능하다.
+
+@Service
+@RequiredArgsConstructor
+public class ElasticsearchService {
+
+	private final RestHighLevelClient client;
+
+	private static final String INDEX = "my_index";
+	
+    public SearchResponse sampleQuery() throws IOExcepti... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a><a class="post-tag" href="/tags.html#Spring">#Spring</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html">
+          Spring-Elasticsearch 연동 1- Spring 설정
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Dec 09, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 3 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-1-Spring-%EC%84%A4%EC%A0%95.html">
+        <p>
+        유용한 참고자료
+
+
+  
+    elasticsearch java builder 모음
+  
+  
+    spring-data-elasitcsearch VS rest-high-level-client
+  
+
+
+기본 설정
+
+의존성 추가
+
+implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+compile 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.15.0'
+compile 'org.elasticsearch.client:elasticsearch-rest-clie... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a><a class="post-tag" href="/tags.html#Spring">#Spring</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html">
+          Spring Batch Insert 어떻게 해결했을까
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Dec 09, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Bulk-Insert-%EC%96%B4%EB%96%BB%EA%B2%8C-%ED%95%B4%EA%B2%B0%ED%96%88%EC%9D%84%EA%B9%8C.html">
+        <p>
+        대용량의 데이터를 DB에 넣어야 하는 일이 발생했다.
+
+한 파일당 약 3만줄의 데이터를 파싱해서 20개의 테이블에 나눠 저장을 하였다. 파일은 모두 90개였던 것으로 기억한다. (전체 저장 데이터가 5G정도 나왔었다.)
+
+다 저장해보니 용량이 어마무시했던 기억이 있는데, 지금은 사용하지 않아 없어졌다.
+
+하지만 Spring Batch Insert를 도전했던 좋은 추억이라 (^^) 기록을 해보려 한다.
+
+JdbcTemplate Bulk Insert 활용기
+
+기본 사용 방법
+
+bulk insert를 위해 batchUpdate() 함수를 사용하였다. 기본 사용 방법은 아래와 같다.
+
+@RequiredArgsConstru... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#JdbcTemplate">#JdbcTemplate</a><a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#Bulk%20Insert">#Bulk Insert</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html">
+          ELK Security 설정
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Nov 04, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/11/04/ELK-Security-%EC%84%A4%EC%A0%95.html">
+        <p>
+        유용한 참고자료
+
+security 적용 기본(username + password)
+
+security api key 적용
+
+elasticsearch 무료버전인 basic license에서 security 기능은 api-key 관리 기능까지 제공을 한다. 참고
+
+이에 맞는 elk security 설정을 정리해 보았다.
+
+1. config 파일 설정
+
+elk를 설치한 후에는 자동으로 elastic이라는 username이 생성되는 것 같다.
+
+elasitc은 superuser 권한으로 모든 인덱스 및 데이터를 포함하여 클러스터에 대한 전체 액세스 권한을 부여한다. 참고
+
+logstash나 kibana를 설정할 때, 다른 ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html">
+          ELK query 사용 정리
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Oct 08, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 12 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/10/08/ELK-QUERY-%EC%82%AC%EC%9A%A9%EC%A0%95%EB%A6%AC.html">
+        <p>
+        설정
+
+
+  
+    java heap memory 늘리기
+
+    $vi docker-elk/docker-compose.yml
+    
+
+    service:
+	elasticsearch:
+		...
+		environment:
+			EX_JAVA_OPTS: "-Xmx8G -Xms4G"
+    
+
+    최대 8G/최소4G로 수정
+  
+  
+    elasticsearch 기본 최대 조회 개수 1만개  -&gt; 현재 10만개로 변경
+
+    참고
+
+    PUT your_index_name/_settings
+{ 
+  "max_result_window" : 500000 
+}
+    
+  
+  
+    kibana에... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html">
+          DOCKER에서 ELK 설치 및 사용하기
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Sep 27, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/09/27/DOCKER%EC%97%90%EC%84%9C-ELK-%EC%84%A4%EC%B9%98-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0.html">
+        <p>
+        유용한 참고자료들
+
+Elastic 가이드북(한글)
+
+centos에 docker 설치(docker-docs)
+
+linux에 docker-compse 설치
+
+docker-conpose 명령어 정리
+
+dokcer-elk git
+
+elk config 수정 정리
+
+logstash - jdbc 연결 참고 자료
+
+logstash - jdbc docs
+
+1. Docker 설치
+
+docs를 참고하여 설치
+
+docker를 이미 설치했고 사용하고 있는 상태라면 삭제 X
+
+2. docker-compose 설치
+
+docker-compose docs를 참고하여 설치
+
+3. docker-elk 설치
+
+docker-elk 설치를 원하는 위치로... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#ELK">#ELK</a><a class="post-tag" href="/tags.html#Docker">#Docker</a><a class="post-tag" href="/tags.html#elasticsearch">#elasticsearch</a><a class="post-tag" href="/tags.html#logstash">#logstash</a><a class="post-tag" href="/tags.html#kibana">#kibana</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html">
+          Spring에서 외부 API 호출하기 3 (WebClient 활용)
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Aug 24, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 7 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/08/24/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-3-WebClient-%ED%99%9C%EC%9A%A9.html">
+        <p>
+        활용
+
+그.래.서
+
+대-충 webClient를 사용하는 방법은 알았고, 그 후엔 어떻게 하면 효율적으로 사용할 수 있는지 계속 고민을 하였었다.
+
+~~(효율적이라 쓰고 귀찮아서 어떻게 하면 한번에 처리할 수 있을까 머리 굴린거라고 읽는.. )~~
+
+대략적인 상황은 이랬었다.
+
+
+  약 20개의 각기 다른 api를 호출.
+  각 Response는 당연히 다르다. (같은 것도 있긴 했다.)
+  외부 api에서 서버에러가 발생하는 경우(http status가 40x, 50x로 오는 경우)  response가 정해진 형식으로 도착한다.
+  그 외 예상하지 못한 오류가 발생하면 그냥 에러로 넘어온다.
+  어떤 api는 상태... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#%EC%99%B8%EB%B6%80%20API%20%ED%98%B8%EC%B6%9C">#외부 API 호출</a><a class="post-tag" href="/tags.html#Webclient">#Webclient</a><a class="post-tag" href="/tags.html#WebFlux">#WebFlux</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/08/11/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-2-Webclient.html">
+          Spring에서 외부 API 호출하기 2 (Webclient)
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Aug 11, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 8 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/08/11/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-2-Webclient.html">
+        <p>
+        spring 5 이상에서는 webclient를 지향한다 하여 프로젝트에서는 webclient를 주로 사용하였다.
+
+원래는 전체적으로 다 쓰고 싶었지만 안되는걸 어떡하나요
+
+webclient를 사용하면서 약간 힘든점이 있었다면 webclient는 webFlux를 사용한다는 것이었다.
+
+reactive programming은 너무 미지의 세계였고.. 공부할 것도 많고.. 여러모로 장벽이 느껴졌지만 천천히 공부해 가면서 프로젝트를 진행해보았다.
+
+(천천히 해도 됐을지는 모르겠다..^^.. )
+
+WebClient
+
+WebClient에 관한 설명이다.
+
+
+  Simply put, WebClient is an interfac... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#%EC%99%B8%EB%B6%80%20API%20%ED%98%B8%EC%B6%9C">#외부 API 호출</a><a class="post-tag" href="/tags.html#Webclient">#Webclient</a><a class="post-tag" href="/tags.html#WebFlux">#WebFlux</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html">
+          Spring에서 외부 API 호출하기 1 (RestTemplate)
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Aug 05, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/08/05/Spring%EC%97%90%EC%84%9C-%EC%99%B8%EB%B6%80-API-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0-1-(RestTemplate).html">
+        <p>
+        프로젝트에서 외부 api를 이용하여 로직을 짜는 부분을 맡게 되었다.
+
+Spring에서 외부 api를 호출하기 위해서는 RestTemplate이나 Webclient를 사용한다고 하여 관련 자료를 찾아보고 적용해 보았다.
+
+사실 처음에는 webClient만을 사용하다가, 안되는 기능이 있어 restTemplate도 같이 사용하게 되었다…
+
+프로젝트를 진행하면서 새롭게 알게 된 사실이나 정리할 부분이 많아 이를 한번 정리해 보았다.
+
+RestTemplate
+
+restTemplate은 Spring 3부터 지원된 api로, api를 호출한 후 응답을 받을 때 까지 기다리는 동기 방식이다.
+
+spring5 버전부터는 res... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#%EC%99%B8%EB%B6%80%20API%20%ED%98%B8%EC%B6%9C">#외부 API 호출</a><a class="post-tag" href="/tags.html#RestTemplate">#RestTemplate</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/05/13/JPA-OneToOne-%EA%B4%80%EA%B3%84%EC%9D%B8%EB%8D%B0-2%EA%B0%9C%EA%B0%80-%EC%A0%80%EC%9E%A5%EB%90%A8.html">
+          JPA OneToOne 관계인데 2개가 저장됨
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> May 13, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/05/13/JPA-OneToOne-%EA%B4%80%EA%B3%84%EC%9D%B8%EB%8D%B0-2%EA%B0%9C%EA%B0%80-%EC%A0%80%EC%9E%A5%EB%90%A8.html">
+        <p>
+        구독플랫폼 프로젝트 회원가입/수정 부분을 진행하는 중이었다.
+
+회원가입을 먼저 진행하여 User를 생성하였고, 그 후에 Customer에 필요한 정보를 넣어 생성하거나 수정하는 로직을 만들었다.
+
+간단한 insert니까 빨리 끝낼 수 있을 줄 알았다. 나의 경기도 오산이었다…
+
+OneToOne관계니까 당연히 1개만 저장될 줄 알았는데 혹시 몰라 한번 더 눌러보니 2개가 저장되는 일이 발생하였다.
+
+뭐가 잘못이지? CaseCade, Fetch, Transactional 모두 수정해 보았지만 2개보다 더 많이 저장되는 경우도 발생해버렸다 ^^..
+
+혹시나 하는 마음에 생성된 테이블을 보니.. Customer 테이블에 ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#JPA">#JPA</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/14/HTTP-%ED%97%A4%EB%8D%94-2-%EC%BA%90%EC%8B%9C%EC%99%80-%EC%A1%B0%EA%B1%B4%EB%B6%80-%EC%9A%94%EC%B2%AD.html">
+          HTTP 헤더 2 - 캐시와 조건부 요청
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 14, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 6 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/14/HTTP-%ED%97%A4%EB%8D%94-2-%EC%BA%90%EC%8B%9C%EC%99%80-%EC%A1%B0%EA%B1%B4%EB%B6%80-%EC%9A%94%EC%B2%AD.html">
+        <p>
+        캐시가 없을 때
+
+
+  
+    웹 브라우저에서 GET/star.jpg 요청
+    서버에서 헤더(0.1M) + 바디(1.0M) 데이터를 전송함 -&gt; 총 1.1M
+    웹 브라우저에서 다시 start 요청
+    2번 반복 -&gt; 1.1M 데이터가 다시 전송됨
+  
+
+
+데이터가 변경되지 않아도 계속 네트워크를 통해서 데이터를 다운로드 받아야한다
+
+인터넷 네트워크는 매우 느리고 비쌈
+
+브라우저 로딩 속도가 느림 -&gt; 느린 사용자 경험
+
+캐시 적용
+
+
+  
+    
+      웹 브라우저에서 GET/star.jpg 요청
+    
+    
+      서버에서 헤더(0.1M) + 바디(1.0M) 데이터를 ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html">
+          HTTP 상태코드 요약
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 12, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html">
+        <p>
+        클라이언트가 보낸 요청의 처리 상태를 응답에서 알려주는 기능
+
+
+  1xx : 요청이 수신되어 처리중 (거의 사용안함)
+  2xx : 요청 정상 처리
+  3xx : 요청을 완료하려면 추가행동 필요 (리다이렉트)
+  4xx : 클라이언트 오류, 잘못된 문법 등으로 서버가 요청 수행할 수 없음
+  5xx : 서버 오류, DB 문제 등으로 서버가 정상 요청을 처리하지 못함
+
+
+만약, 모르는 상태코드가 나타난다면?
+
+클라이언트는 상위 상태 코드로 해석해서 처리 -&gt; 299로 온다면 대충 2xx.. 성공이구나.. 이렇게..
+
+1XX 상태코드
+
+
+  
+    
+      HTTP 상태 코드
+      Value
+    ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html">
+          클라이언트에서 서버로 데이터 전송
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 06, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html">
+        <p>
+        데이터 전달 방식은 크게 2가지
+
+
+  쿼리 파라미터를 통한 데이터 전송
+    
+      GET
+      주로 정렬 필터, 검색어 ex) /search?q=hello -&gt; hello를 검색
+    
+  
+  메시지 바디를 통한 데이터 전송
+    
+      POST, PUT, PATCH
+      회원가입, 상품주분, 리소스 등록, 리소스 변경..
+      
+    
+  
+
+
+클라이언트에서 서버로 데이터를 전송하는 상황 4가지
+
+1. 정적 데이터 조회
+
+GET /static/star.jpg HTTP/1.1
+Host: localhost:8080
+
+
+클라이언트에서 star.jpg 정적 이미지 조회를 GE... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/05/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C.html">
+          HTTP API를 만들어 보자
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 05, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 3 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/05/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C.html">
+        <p>
+        HTTP API를 만들어 보자
+
+API를 설계할 때 가장 중요한 것은 리소스 식별
+
+리소스?
+
+
+  
+    회원을 등록 -&gt; 회원이라는 개념이 리소스
+  
+  
+    등록, 수정 이런 동사는 모두 배제하고 회원 리소스를 URI에 매핑해야한다
+
+    ex) 조회 members/
+
+    ​	  수정 members/{id}
+
+    ​	  삭제 members/{id}
+  
+  
+    참고 : 계층 구조상 상위를 컬렉션으로 보고 복수단어 사용권장 (member -&gt; members)
+  
+  
+    위의 조회, 수정, 삭제 등을 구별하는 방법 -&gt; 행위로 구분 -&gt; HTTP 메서드로 구분한다... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/04/HTTP-%EA%B8%B0%EB%B3%B8.html">
+          HTTP
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 04, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 5 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/04/HTTP-%EA%B8%B0%EB%B3%B8.html">
+        <p>
+        HTTP
+
+
+  
+    HyperText Transfer Protocol
+  
+  
+    HTTP 메시지에 모든것을 전송
+
+    ex) HTML, TEXT, IMAGE, 음성, JSON 등
+
+    서버간 데이터를 주고받을 때도 대부분 HTTP 사용
+
+    TCP 연결은 게임..? 요즘은 게임도 HTTP로 주고받음
+  
+  
+    현재 가장많이 사용하는 버전은 HTTP/1.1
+  
+  
+    HTTP/2 와 HTTP3도 혼용해서 많이 사용(주로 성능개선으로 이뤄져있음)
+  
+  
+    기반 프로토콜
+
+    
+      
+        
+          TCP
+          HTTP/1.1, HT... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/git/2021/04/03/Fork%ED%95%9C-Repository-%EC%B5%9C%EC%8B%A0%EC%9C%BC%EB%A1%9C-%EB%8F%99%EA%B8%B0%ED%99%94-%ED%95%98%EA%B8%B0.html">
+          Fork한 repository 최신으로 동기화 하기
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 03, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+      </div>
+      <a class="post-excerpt" href="/git/2021/04/03/Fork%ED%95%9C-Repository-%EC%B5%9C%EC%8B%A0%EC%9C%BC%EB%A1%9C-%EB%8F%99%EA%B8%B0%ED%99%94-%ED%95%98%EA%B8%B0.html">
+        <p>
+        Fork한 repository 최신으로 동기화 하기
+
+1. git remote -v
+
+
+  현재 연결된 remote 확인 -&gt; 내 repository에 있는 원격이어야함!
+
+
+2. git remote add upstream {원본 repository 주소}
+
+
+  동기화 해오고 싶은 원본 repository 를 upstream 이라는 이름으로 추가한다.
+
+
+3. git fetch upstream
+
+
+  원본 repository의 최신 내용을 가져온다.
+
+
+4. git checkout {branch}
+
+
+  원하는 브랜치로 체크아웃
+
+
+5. git merge upstream/{branch}
+
+
+  upstrea... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags"><a class="post-tag" href="/tags.html#git">#git</a></div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/04/03/ENUM-%EB%A6%AC%ED%8C%A9%ED%86%A0%EB%A7%81-%EA%B3%BC%EC%A0%95.html">
+          ENUM 리팩토링 과정
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 03, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 10 mins</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/04/03/ENUM-%EB%A6%AC%ED%8C%A9%ED%86%A0%EB%A7%81-%EA%B3%BC%EC%A0%95.html">
+        <p>
+        업무중에  enum을 사용해서 타입을 정한 부분이 있었다.
+
+2020년 12월쯤 짰던 코드 같은데, 만들 당시에도 switch문이 과도하게 들어가고  list에 add를 반복하여 사용하는 등 만족스럽지 못한 코드였다.
+
+물론 그당시에도 enum을 썼었다. 그런데 switch문이.. 2개나.. ㅠㅠ..
+
+이번에 다시 이 기능을 손보며 불만족 스러운 코드를 바꿔보았다.
+
+기존코드
+
+기존 코드를 그대로 가져올 수 없어서 enum 의 대표 예제인 계산기와 내 코드에서 발생한 문제를 조합하여 예시를 만들어보았다.
+
+계산기를 기본과 공학용으로 나눠  BASIC타입에는 덧셈, 뺄셈 ENGINEERING에는 덧셈, 뺄셈, 곱셈,... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#JAVA">#JAVA</a><a class="post-tag" href="/tags.html#enum">#enum</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/02/URI%EC%99%80-%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%9A%94%EC%B2%AD-%ED%9D%90%EB%A6%84.html">
+          URI
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 02, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/02/URI%EC%99%80-%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80-%EC%9A%94%EC%B2%AD-%ED%9D%90%EB%A6%84.html">
+        <p>
+        URI
+
+Uniform Resorce Identifier
+
+리소스를 식별하는 통일된 방식
+
+URL, URN ?
+
+
+  URL은 리소스가 이 위치에 있음을 지정
+  URN은 리소스에 이름을 부여 ex) isbn:1234566
+  URN은 잘 사용되지 않아서 거의 URI = URL
+
+
+URL 전체 문법
+
+scheme://[userinfo@]host[:port][/path][?query][#fragment]
+ex)
+https://www.google.com:443/search?q=hello&hl=ko
+
+
+
+  
+    https - 프로토콜
+    www.google.com - 호스트명
+    443 - 포트번호
+... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/04/01/JPA-Auditing.html">
+          JPA - Auditing
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Apr 01, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%9C%EB%B0%9C/2021/04/01/JPA-Auditing.html">
+        <p>
+        JPA - Auditing
+
+엔티티 변경 시점에 언제, 누가 변경했는지에 대한 정보를 기록하는 기능
+
+
+  
+    Auditing 정보를 담은 추상 클래스 생성
+
+    @MappedSuperclass 
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseTimeEntity {
+   
+    @CreatedDate
+    private LocalDateTime createdDate;
+   
+    @LastModifiedDate
+    private LocalDateTime lastModitiedDate;
+   
+}
+    
+
+    ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#Spring">#Spring</a><a class="post-tag" href="/tags.html#Jpa">#Jpa</a><a class="post-tag" href="/tags.html#Auditing">#Auditing</a>
+</div>
+    </li>
+<li>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h2 class="post-title">
+        <a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/03/31/%EC%9D%B8%ED%84%B0%EB%84%B7-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC.html">
+          인터넷 네트워크
+        </a>
+      </h2>
+      <div class="post-meta">
+        <span class="post-date"><i class="fa fa-calendar"></i> Mar 31, 2021</span>
+        <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 1 min</span>
+      </div>
+      <a class="post-excerpt" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/03/31/%EC%9D%B8%ED%84%B0%EB%84%B7-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC.html">
+        <p>
+        인터넷 통신
+
+
+  클라이언트와 버서간 다양한 노드 서버들을 거쳐서 통신
+
+
+IP(인터넷 프로토콜)
+
+
+  클라이언트와 서버간 지정한 IP 주소로 데이터를 전달한다.
+  패킷이라는 통신단위로 데이터 전달
+  클라이언트 -&gt; 서버, 서버 -&gt; 클라이언트 간의 노드들은 경로가 달라질 수 있음
+  중간에 서버가 끊길 경우 제대로 도착하지 않음
+  패킷을 받을 대상이 없거나 서비스 불능 상태여도 패킷 전송
+  여러개의 패킷이 순서대로 도착하지 않을 수 있음
+  같은 IP를 사용하는 서버에서 통신하는 애플리케이션이 둘 이상일 경우 구분 불가
+
+
+TCP, UDP
+
+TCP
+
+
+  IP 계층의 보완
+  출발지 포트와 ... <span class="read_more">Read More</span>
+        </p>
+      </a>
+      <div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div>
+    </li>
+</ul>
+
+  <!-- Pagination links -->
+</div>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="common-list">
+  <ul>
+    <li>
+      <a href="/index.html">
+        All<span>24</span>
+      </a>
+    </li>
+
+    
+      <li>
+        <a href="/categories.html#h-git">
+          git <span>1</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC">
+          강의정리 <span>7</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-%EA%B0%9C%EB%B0%9C">
+          개발 <span>15</span>
+        </a>
+      </li>
+    
+      <li>
+        <a href="/categories.html#h-%ED%9A%8C%EA%B3%A0">
+          회고 <span>1</span>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

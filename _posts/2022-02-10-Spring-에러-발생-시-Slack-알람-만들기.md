@@ -17,7 +17,7 @@ tags: [Spring, logging, Slack, logback-slack-appender, 알람]
 
 
 
-## :one: logback-slack-appender
+## 1.​ logback-slack-appender
 
 Spring에 관련 기능이 있을까 하여 검색해보니 가장 대표적으로 사용하는 것이 logback-slack-appender 라이브러리 였다. 
 
@@ -25,9 +25,7 @@ logback에서 error 로그와 관련한 부분이 생기면 이벤트를 발생�
 
 ### 적용 방법 
 
-기본적인 사용 방법은 아래 링크의 블로그를 참고하여 개발하였다.
-
-https://velog.io/@haerong22/Spring-%EC%8A%AC%EB%9E%99%EC%97%90-%EB%A1%9C%EA%B7%B8-%EB%82%A8%EA%B8%B0%EA%B8%B0 
+기본적인 사용 방법은 링크의 이 [블로그](https://velog.io/@haerong22/Spring-%EC%8A%AC%EB%9E%99%EC%97%90-%EB%A1%9C%EA%B7%B8-%EB%82%A8%EA%B8%B0%EA%B8%B0 )를 참고하여 개발하였다.
 
 에러 알림을 만든다고 하였을 때, alpha 서버의 에러만 받도록 해달라는 팀장님의 요청이 있었고, 어찌어찌 alpha 서버 관련한 profile만 적용할 수 있도록 수정하였다. 
 
@@ -85,15 +83,11 @@ https://velog.io/@haerong22/Spring-%EC%8A%AC%EB%9E%99%EC%97%90-%EB%A1%9C%EA%B7%B
 
 
 
-## :two: Custom slack alaram
+## 2. slack alaram
 
 일단 사용 후기 작성 전, 손너잘님께 감사의 인사를 보냅니다..!
 
-자세한 개발 방법은 손너잘님의 블로그를 참고!
-
-https://bperhaps.tistory.com/entry/Spring-Slack-Alarm-Logger-%EB%A7%8C%EB%93%A4%EA%B8%B0 
-
-
+자세한 개발 방법은 [손너잘님의 블로그](https://bperhaps.tistory.com/entry/Spring-Slack-Alarm-Logger-%EB%A7%8C%EB%93%A4%EA%B8%B0 )를 참고!
 
 사실 참고라고 할 것도 없이, 개발하신 코드를 복붙해서 사용했다 ^^.. 
 
@@ -107,7 +101,7 @@ https://bperhaps.tistory.com/entry/Spring-Slack-Alarm-Logger-%EB%A7%8C%EB%93%A4%
 
 #### 개발자가 정의한 Exception과 의도치 않은 Exception 구분
 
-우리 프로젝트에서 Exception 전략을 https://cheese10yun.github.io/spring-guide-exception/ 를 참고하여 만들었다.. 
+우리 프로젝트에서 Exception 전략을 [cheese10yun 님의 블로그](https://cheese10yun.github.io/spring-guide-exception/)를 참고하여 만들었다.. 
 
 BusinessException은 개발자가 정의한 Exception이고, 그렇지 않은 경우는 그냥 Exception이 발생하게 된다. 
 

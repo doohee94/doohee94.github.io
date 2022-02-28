@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>클라이언트에서 서버로 데이터 전송 | URMOO BLOG</title>
+<meta name="generator" content="Jekyll v4.2.1">
+<meta property="og:title" content="클라이언트에서 서버로 데이터 전송">
+<meta name="author" content="doohee94">
+<meta property="og:locale" content="en_US">
+<meta name="description" content="데이터 전달 방식은 크게 2가지">
+<meta property="og:description" content="데이터 전달 방식은 크게 2가지">
+<link rel="canonical" href="http://localhost:4000/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html">
+<meta property="og:url" content="http://localhost:4000/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html">
+<meta property="og:site_name" content="URMOO BLOG">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2021-04-06T00:00:00+09:00">
+<meta name="twitter:card" content="summary">
+<meta property="twitter:title" content="클라이언트에서 서버로 데이터 전송">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"doohee94"},"dateModified":"2021-04-06T00:00:00+09:00","datePublished":"2021-04-06T00:00:00+09:00","description":"데이터 전달 방식은 크게 2가지","headline":"클라이언트에서 서버로 데이터 전송","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html"},"url":"http://localhost:4000/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/06/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C-%ED%99%9C%EC%9A%A9.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="shortcut icon" href="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-noto-sans@0.0.72/index.min.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <script src="/assets/js/main.js"></script><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="URMOO BLOG">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+<!-- and it's easy to individually load additional languages -->
+<script charset="UTF-8" src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/languages/go.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+// Init highlight js
+document.addEventListener('DOMContentLoaded', function(event) {
+  var els = document.querySelectorAll('pre code')
+
+  function addLangData(block) {
+    var outer = block.parentElement.parentElement.parentElement;
+    var lang = block.getAttribute('data-lang');
+    for (var i = 0; i < outer.classList.length; i++) {
+      var cls = outer.classList[i];
+      if (cls.startsWith('language-')) {
+        lang = cls;
+        break;
+      }
+    }
+    if (!lang) {
+      cls = block.getAttribute('class');
+      lang = cls ? cls.replace('hljs ', '') : '';
+    }
+    if (lang.startsWith('language-')) {
+      lang = lang.substr(9);
+    }
+    block.setAttribute('class', 'hljs ' + lang);
+    block.parentNode.setAttribute('data-lang', lang);
+  }
+
+  function addBadge(block) {
+    var enabled = ('true' || 'true').toLowerCase();
+    if (enabled == 'true') {
+      var pre = block.parentElement;
+      pre.classList.add('badge');
+    }
+  }
+
+  function handle(block) {
+    addLangData(block);
+    addBadge(block)
+    hljs.highlightBlock(block);
+  }
+
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    handle(el);
+  }
+});
+</script>
+
+<style>
+  /* code language badge */
+  pre.badge::before {
+    content: attr(data-lang);
+    color: #fff;
+    background-color: #ff4e00;
+    padding: 0 .5em;
+    border-radius: 0 2px;
+    text-transform: uppercase;
+    text-align: center;
+    min-width: 32px;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+  }
+
+  /* fix wrong badge display for firefox browser */
+  code > table pre::before {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<header class="site-header " role="banner">
+
+  <div class="wrapper">
+    <div class="site-header-inner">
+<span class="site-brand"><a class="site-brand-inner" rel="author" href="/">
+  <img class="site-favicon" title="URMOO BLOG" src="" onerror="this.style.display='none'">
+  URMOO BLOG
+</a>
+</span><nav class="site-nav">
+          <input type="checkbox" id="nav-trigger" class="nav-trigger">
+          <label for="nav-trigger">
+            <span class="menu-icon">
+              <svg viewbox="0 0 18 15" width="18px" height="15px">
+                <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"></path>
+              </svg>
+            </span>
+          </label>
+
+          <div class="trigger">
+<a class="page-link" href="/about.html">ABOUT</a><a class="page-link" href="/archives.html">ARCHIVES</a><a class="page-link" href="/categories.html">CATEGORIES</a><a class="page-link" href="/">HOME</a><a class="page-link" href="/tags.html">TAGS</a>
+
+
+
+
+</div>
+        </nav>
+</div>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    var lastScrollY = getScrollPos().y;
+    var documentElement = document.documentElement;
+
+    function storeScrollData() {
+      var y = getScrollPos().y;var scrollStatus = "";
+
+      if (y <= 0) {
+        scrollStatus = "top";
+      } else if ((window.innerHeight + y) >= document.body.offsetHeight) {
+        scrollStatus = "bottom";
+      } else {
+        var isScrollDown = (y - lastScrollY > 0) ? true : false;
+        scrollStatus = isScrollDown ? "down" : "up";
+      }
+
+      lastScrollY = y;
+      documentElement.setAttribute("data-scroll-status", scrollStatus);
+    }
+
+    window.addEventListener('scroll', function(e) {
+      storeScrollData();
+    });
+
+    storeScrollData();
+  }
+  document.addEventListener('DOMContentLoaded', initHeader);
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  function hashLocate(hashValue) {
+    hashValue = hashValue.replace(/^.*#h-/, '');
+    hashValue = decodeURIComponent(hashValue);
+    var element = document.getElementById(hashValue);
+
+    if (!element) {
+      return;
+    }
+
+    var header = document.querySelector('header.site-header');
+    var headerRect = header.getBoundingClientRect();
+    var headerTop = Math.floor(headerRect.top);
+    var headerHeight = Math.floor(headerRect.height);
+    var scrollPos = getScrollPos();
+    var offsetY = element.offsetTop - (headerTop + headerHeight + 20);
+
+    if (offsetY == scrollPos.y) {
+      return;
+    }
+
+    if (headerTop == 0  && offsetY > scrollPos.y) {
+      offsetY += headerHeight + 2;
+    } else if (headerTop < 0  && offsetY < scrollPos.y) {
+      offsetY -= headerHeight - 2;
+    }
+
+    smoothScrollTo(offsetY);
+  }
+
+  // The first event occurred
+  window.addEventListener('load', function(event) {
+    if (window.location.hash) {
+      hashLocate(window.location.hash);
+    }
+  });
+
+  // The first event occurred
+  window.addEventListener('click', function(event) {
+    if (event.target.tagName.toLowerCase() == 'a') {
+      hashLocate(event.target.getAttribute('href'));
+    }
+  });
+</script>
+<div class="theme-toggle">
+  <input type="checkbox" id="theme-switch">
+  <label for="theme-switch">
+    <div class="toggle"></div>
+    <div class="names">
+      <p class="light">Light</p>
+      <p class="dark">Dark</p>
+    </div>
+  </label>
+</div>
+
+
+
+
+<script>
+  (function() {
+    var sw = document.getElementById('theme-switch');
+    var html = document.getElementsByTagName('html')[0];
+    var nightModeOption = ('auto' || 'auto').toLowerCase();
+    var storage = nightModeOption === 'manual'
+        ? localStorage
+        : sessionStorage;
+    var themeData = loadThemeData();
+
+    function saveThemeData(data) {
+      storage.setItem('theme', JSON.stringify(data));
+    }
+
+    function loadThemeData() {
+      var data = storage.getItem('theme');
+      try {
+        data = JSON.parse(data ? data : '');
+      } catch(e) {
+        data = { nightShift: undefined, autoToggleAt: 0 };
+        saveThemeData(data);
+      }
+      return data;
+    }
+
+    function handleThemeToggle(nightShift) {
+      themeData.nightShift = nightShift;
+      saveThemeData(themeData);
+      html.dataset.theme = nightShift ? 'dark' : 'light';
+      setTimeout(function() {
+        sw.checked = nightShift ? true : false;
+      }, 50);
+    }
+
+    function autoThemeToggle() {
+      // Next time point of theme toggle
+      var now = new Date();
+      var toggleAt = new Date();
+      var hours = now.getHours();
+      var nightShift = hours >= 19 || hours <=7;
+
+      if (nightShift) {
+        if (hours > 7) {
+          toggleAt.setDate(toggleAt.getDate() + 1);
+        }
+        toggleAt.setHours(7);
+      } else {
+        toggleAt.setHours(19);
+      }
+
+      toggleAt.setMinutes(0);
+      toggleAt.setSeconds(0);
+      toggleAt.setMilliseconds(0)
+
+      var delay = toggleAt.getTime() - now.getTime();
+
+      // auto toggle theme mode
+      setTimeout(function() {
+        handleThemeToggle(!nightShift);
+      }, delay);
+
+      return {
+        nightShift: nightShift,
+        toggleAt: toggleAt.getTime()
+      };
+    }
+
+    // Listen the theme toggle event
+    sw.addEventListener('change', function(event) {
+      handleThemeToggle(event.target.checked);
+    });
+
+    if (nightModeOption == 'auto') {
+      var data = autoThemeToggle();
+
+      // Toggle theme by local setting
+      if (data.toggleAt > themeData.autoToggleAt) {
+        themeData.autoToggleAt = data.toggleAt;
+        handleThemeToggle(data.nightShift);
+      } else {
+        handleThemeToggle(themeData.nightShift);
+      }
+    } else if (nightModeOption == 'manual') {
+      handleThemeToggle(themeData.nightShift);
+    } else {
+      var nightShift = themeData.nightShift;
+      if (nightShift === undefined) {
+        nightShift = nightModeOption === 'on';
+      }
+      handleThemeToggle(nightShift);
+    }
+  })();
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="framework">
+  <section class="main">
+
+     <div class="post">
+  <section>
+
+
+
+
+
+
+
+
+
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">클라이언트에서 서버로 데이터 전송</h1>
+  <h2 class="post-subtitle">김영한님의 모든 개발자를 위한 HTTP 웹 기본 지식 강의를 듣고 내용을 정리하고 있습니다.</h2>
+
+  <p class="post-meta">
+    <time class="dt-published" datetime="2021-04-06T00:00:00+09:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Apr 06, 2021
+    </time>
+
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 4 mins</span>
+  </p>
+<div class="post-tags">
+<a class="post-tag" href="/tags.html#HTTP">#HTTP</a><a class="post-tag" href="/tags.html#REST">#REST</a>
+</div></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h2 id="데이터-전달-방식은-크게-2가지">데이터 전달 방식은 크게 2가지</h2>
+
+<ol>
+  <li>쿼리 파라미터를 통한 데이터 전송
+    <ul>
+      <li>GET</li>
+      <li>주로 정렬 필터, 검색어 ex) /search?q=hello -&gt; hello를 검색</li>
+    </ul>
+  </li>
+  <li>메시지 바디를 통한 데이터 전송
+    <ul>
+      <li>POST, PUT, PATCH</li>
+      <li>회원가입, 상품주분, 리소스 등록, 리소스 변경..</li>
+      <li>
+    </li>
+</ul>
+  </li>
+</ol>
+
+<h2 id="클라이언트에서-서버로-데이터를-전송하는-상황-4가지">클라이언트에서 서버로 데이터를 전송하는 상황 4가지</h2>
+
+<h3 id="1-정적-데이터-조회">1. 정적 데이터 조회</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /static/star.jpg HTTP/1.1
+Host: localhost:8080
+</code></pre></div></div>
+
+<p>클라이언트에서 star.jpg 정적 이미지 조회를 GET으로 요청하면 서버에서 해당 데이터를 찾아서 응답</p>
+
+<ul>
+  <li>
+    <p>이미지, 정적 텍스트 문서</p>
+  </li>
+  <li>
+    <p>조회는 GET 사용</p>
+  </li>
+  <li>
+    <p>정적 데이터는 쿼리파라미터 없이 리소스 경로로 단순하게 조회 가능</p>
+  </li>
+</ul>
+
+<h3 id="2-동적-데이터-조회">2. 동적 데이터 조회</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /search?q=hello&amp;hl=ko HTTP/1.1
+Host: www.google.com
+</code></pre></div></div>
+
+<ul>
+  <li>주로 검색, 게시판 목록 정렬 필터에 사용</li>
+  <li>조회는 GET 사용, 쿼리파라미터를 사용해 데이터 서버에 전달</li>
+  <li>
+</li>
+</ul>
+
+<h3 id="3-html-form을-통한-데이터-전송">3. HTML FORM을 통한 데이터 전송</h3>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;form</span> <span class="na">action=</span><span class="s">"/save"</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"username"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"text"</span> <span class="na">name=</span><span class="s">"age"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>전송<span class="nt">&lt;/button&gt;</span>
+<span class="nt">&lt;/form&gt;</span>
+</code></pre></div></div>
+
+<p>이렇게 HTML Form 에 담고 POST로 전송하면 웹브라우저에서 자동으로</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /save HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded
+
+username=kim&amp;age=20
+</code></pre></div></div>
+
+<p>이렇게 생성하여 서버로 요청을 보낸다. (바디에 변환해서..)</p>
+
+<ul>
+  <li>만약 FORM에서 method를 GET으로 보낸다면 쿼리파라미터로 생성해서 보냄</li>
+</ul>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /save?username=kim&amp;age=20 HTTP/1.1
+Host: localhost:8080
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>HTML FORM에서는 multipart를 이용하여 바이너리 형태의 모든 형식의 파일을 전송할 수 있다. ex) 이미지, 영상 등등등</p>
+  </li>
+  <li>
+    <p>HTML FORM은 GET과 POST만 지원</p>
+  </li>
+</ul>
+
+<h3 id="4-http-api를-통한-데이터-전송">4. HTTP API를 통한 데이터 전송</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /members HTTP/1.1
+Content-Type: application/json
+
+{
+	"username":"lee"
+	"age":20
+}
+</code></pre></div></div>
+
+<p>이렇게 json 형식으로 데이터를 보냄</p>
+
+<ul>
+  <li>서버 to 서버 의 백엔드 시스템 통신</li>
+  <li>아이폰, 안드로이드의 앱 클라이언트 통신</li>
+  <li>AJAX 와 같이 Form 전송 대신 웹 클라이언트 통신 혹은 리액트, 뷰와 함께 웹 클라이언트 API 통신</li>
+  <li>POST, PUT, PATCH -&gt; 메시지 바디를 통해 데이터 전송 가능</li>
+  <li>GET -&gt; 쿼리 파라미터로 데이터 전송</li>
+  <li>Content-Type: application/json 을 주로 사용 (HTML, XML 등등 많이 쓰지만 JSON이 거의 표준처럼 사용됨)</li>
+</ul>
+
+<h2 id="http-api-설계-예시">HTTP API 설계 예시</h2>
+
+<h3 id="참고하면-좋은-uri-설계-개념">참고하면 좋은 URI 설계 개념</h3>
+
+<blockquote>
+  <ul>
+    <li>
+      <p>문서</p>
+
+      <ul>
+        <li>
+          <p>단일 개념(파일 하나, 객체 인스턴스, 데이터베이스)</p>
+        </li>
+        <li>
+          <p>ex) /members/100, /files/star.jpg</p>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <p>컬렉션</p>
+
+      <ul>
+        <li>
+          <p>서버가 관리하는 리소스 디렉터리</p>
+        </li>
+        <li>
+          <p>서버가 리소스의 URI를 생성하고 관리</p>
+        </li>
+        <li>
+          <p>ex) 회원가입을 하면 서버에서 회원을 생성하고 ID를 부여하는 느낌..</p>
+        </li>
+        <li>
+          <p>대부분은 컬렉션을 사용한다</p>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <p>스토어</p>
+
+      <ul>
+        <li>클라이언트가 관리하는 자원 저장소</li>
+        <li>클라이언트가 리소스의 URI를 알고 관리</li>
+        <li>ex) 파일의 이름을 클라이언트가 알고 넣어줌.. (사실 잘 모르겠음)</li>
+      </ul>
+    </li>
+    <li>
+      <p>컨트롤러 , 컨트롤 URI</p>
+
+      <ul>
+        <li>
+          <p>문서 , 컬렉션, 스토어로 해결하기 어려운 추가 프로세스 실행</p>
+        </li>
+        <li>
+          <p>동사를 사용</p>
+        </li>
+        <li>
+          <p>ex) html form 은post랑 get만 사용 가능 -&gt; delete를 위해서 /members/1/delete 이런식으로 사용</p>
+
+          <p>​		이 경우에는 delete가 컨트롤 URI</p>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+</blockquote>
+
+<p><strong>회원관리 시스템으로 알아보는 API 설계(컬렉션)</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>회원 목록 /members -&gt; GET
+회원 등록 /members -&gt; POST
+회원 조회 /members/{id} -&gt; GET
+회원 수정 /members/{id} -&gt; PATCH, PUT, POST
+회원 삭제 /members/{id} -&gt; DELETE
+</code></pre></div></div>
+
+<p><strong>파일 관리 시스템으로 알아보는 API 설계(스토어)</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>파일 목록 /files -&gt; GET
+파일 등록 /files/{filename} -&gt; PUT
+파일 조회 /files/{filename} -&gt; GET
+파일 삭제 /files/{filename} -&gt; DELETE
+파일 대량 등록 /files -&gt; POST
+</code></pre></div></div>
+
+<h3 id="post의-특징">POST의 특징</h3>
+
+<ul>
+  <li>클라이언트는 등록될 리소스의 URI를 모른다 (ex 회원 등록 /members -&gt; POST)</li>
+  <li><u>**서버가 새로 등록된 리소스 URI를 생성해 준다.**</u></li>
+</ul>
+
+<h3 id="put-의-특징">PUT 의 특징</h3>
+
+<ul>
+  <li>
+<u>**클라이언트가 리소스의 URI를 알고 있어야 한다.**</u> (ex 파일 등록 /files/{filename} -&gt; PUT)</li>
+  <li>클라이언트가 직접 리소스의 URI를 지정한다 -&gt; 클라이언트가 리소스를 알고 직접 관리</li>
+</ul>
+
+<h3 id="html-form-사용시-컨트롤-uri-사용">HTML FORM 사용시 컨트롤 URI 사용</h3>
+
+<ul>
+  <li>
+    <p>HTML FORM은 GET과 POST만 사용할 수 있어 사용에 제약이 있다</p>
+  </li>
+  <li>
+    <p>이런 제약을 해결하기 위해 동사로 된 리소스 경로 사용</p>
+  </li>
+  <li>
+    <p>ex) /new, /edit, /delete</p>
+  </li>
+  <li>
+    <p>HTTP 메서드로 해결하기 애매한 경우에도 사용한다. ex) /delivery</p>
+  </li>
+</ul>
+
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/05/HTTP-%EB%A9%94%EC%84%9C%EB%93%9C.html" title="HTTP API를 만들어 보자">HTTP API를 만들어 보자</a><a class="next" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/12/HTTP-%EC%83%81%ED%83%9C%EC%BD%94%EB%93%9C.html" title="HTTP 상태코드 요약">HTTP 상태코드 요약</a>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/04/03/ENUM-%EB%A6%AC%ED%8C%A9%ED%86%A0%EB%A7%81-%EA%B3%BC%EC%A0%95.html" title="HTTP 상태코드 요약">ENUM 리팩토링 과정</a></li>
+<li><a class="post-link" href="/%EA%B0%95%EC%9D%98%EC%A0%95%EB%A6%AC/2021/04/14/HTTP-%ED%97%A4%EB%8D%94-2-%EC%BA%90%EC%8B%9C%EC%99%80-%EC%A1%B0%EA%B1%B4%EB%B6%80-%EC%9A%94%EC%B2%AD.html" title="HTTP 상태코드 요약">HTTP 헤더 2 - 캐시와 조건부 요청</a></li>
+<li><a class="post-link" href="/%EA%B0%9C%EB%B0%9C/2021/12/09/Spring-Elasticsearch-%EC%97%B0%EB%8F%99-2-Query-%EC%9E%91%EC%84%B1.html" title="HTTP 상태코드 요약">Spring-Elasticsearch 연동 2 - Query Builder</a></li>
+<li><a class="post-link" href="/git/2021/04/03/Fork%ED%95%9C-Repository-%EC%B5%9C%EC%8B%A0%EC%9C%BC%EB%A1%9C-%EB%8F%99%EA%B8%B0%ED%99%94-%ED%95%98%EA%B8%B0.html" title="HTTP 상태코드 요약">Fork한 repository 최신으로 동기화 하기</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
+</div>
+
+
+  </section>
+  <section class="sidebar" style="margin-left: 15px;">
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
+
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
+</div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
+</section>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+    <div class="site-footer-inner">
+<div>Unpublished Work <span class="copyleft">©</span> 2017-2022 doohee94</div>
+      <div>Powered by <a title="Jekyll is a simple, blog-aware, static site
+      generator." href="https://jekyllrb.com/">Jekyll</a> &amp; <a title="Yat, yet
+      another theme." href="https://github.com/jeffreytse/jekyll-theme-yat">Yat Theme</a>.</div>
+      <div class="footer-col rss-subscribe">Subscribe <a href="/feed.xml">via RSS</a>
+</div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
